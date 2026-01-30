@@ -1,6 +1,6 @@
 # Quick Save - End of Session Workflow
 
-Quickly save progress, commit, and merge to main. Use this at the end of a session.
+Quickly save progress, commit, and create/update a PR. Use this at the end of a session.
 
 ## Steps
 
@@ -15,7 +15,13 @@ Review what was accomplished in this session and update SCRATCHPAD.md:
 
 Keep entries concise - include file paths modified and the WHY behind decisions.
 
-### 2. Commit Changes
+### 2. Check Branch Status
+
+Check if we're on a feature branch:
+- If on `main`, ask user: "Create a new branch for these changes? (e.g., `feature/description`)"
+- If on a feature branch, continue
+
+### 3. Commit Changes
 
 Check git status and create a well-formed commit:
 - Stage all relevant changed files
@@ -23,21 +29,43 @@ Check git status and create a well-formed commit:
 - First line: short summary (50 chars max)
 - Body: explain WHAT and WHY
 
-### 3. Merge to Main
+### 4. Push and Create/Update PR
 
-After committing to the current branch:
-1. Push the current branch to remote
-2. Switch to main branch
-3. Pull latest main
-4. Merge the feature branch into main
-5. Push main to remote
-6. Switch back to the feature branch (for continued work if needed)
+After committing:
+1. Push the current branch to remote: `git push origin <branch-name>`
+2. Check if a PR already exists: `gh pr view`
+3. If no PR exists, create one:
+   ```bash
+   gh pr create --title "<title>" --body "<description>"
+   ```
+4. If PR exists, just confirm it's updated (push automatically updates the PR)
+
+### 5. Report Status
+
+Show the user:
+- Branch name
+- Commit(s) pushed
+- PR URL (clickable link)
+- PR status (draft, ready for review, etc.)
 
 ## Important Notes
 
-- If there are merge conflicts, STOP and ask the user how to proceed
+- **Never merge directly to main** - always use PRs
 - If there are uncommitted changes that shouldn't be committed, STOP and ask
-- Show the user what's happening at each step
-- At the end, confirm: branch merged, main pushed, current branch status
+- If on main with changes, always create a branch first
+- Show the PR URL so user can review/merge in GitHub
+
+## PR Title/Body Guidelines
+
+**Title**: Short, descriptive (e.g., "Add search functionality")
+
+**Body template**:
+```
+## Summary
+- [What changed]
+
+## Test plan
+- [How to verify]
+```
 
 Now execute these steps in order.
