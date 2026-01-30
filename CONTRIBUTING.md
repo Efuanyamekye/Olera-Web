@@ -1,4 +1,4 @@
-# Contributing to Olera
+ # Contributing to Olera
 
 Welcome! This guide will help you contribute to Olera, even if you're new to coding.
 
@@ -326,6 +326,109 @@ git checkout my-feature
 - **Slack/Discord:** Ask in #olera-dev
 - **GitHub:** Open an issue with your question
 - **AI:** Ask Claude! Copy the relevant code and explain your question
+
+---
+
+## 🎯 Hands-On Practice: Your First PR (Monday Session)
+
+This 15-minute exercise walks through the entire workflow with a real change.
+
+### Exercise: Add Your Name to the Team
+
+**Goal:** Create a branch → Make a change → Push → Open a PR → Get it merged
+
+---
+
+#### Step 1: Get the Latest Code (1 min)
+
+```bash
+cd ~/Desktop/olera-web    # Navigate to project
+git checkout main          # Switch to main branch
+git pull origin main       # Get latest changes
+```
+
+#### Step 2: Create Your Branch (1 min)
+
+```bash
+git checkout -b docs/add-yourname
+```
+
+Replace `yourname` with your actual name (e.g., `docs/add-tj`).
+
+#### Step 3: Make a Simple Change (2 min)
+
+Open `README.md` and find the Contributors section (or create one at the bottom):
+
+```markdown
+## Contributors
+
+- Your Name - Your Role
+```
+
+Save the file.
+
+#### Step 4: Check, Stage, and Commit (2 min)
+
+```bash
+git status                              # See your changes (red = unstaged)
+git add README.md                       # Stage the file (or `git add .` for all)
+git status                              # Now it's green = staged
+git commit -m "Add [Your Name] to contributors"
+```
+
+#### Step 5: Push Your Branch (1 min)
+
+```bash
+git push origin docs/add-yourname
+```
+
+First time? GitHub may ask you to set up credentials.
+
+#### Step 6: Open a Pull Request (3 min)
+
+1. Go to https://github.com/olera-care/olera-web
+2. Click the yellow "Compare & pull request" banner
+3. Add a title: `Add [Your Name] to contributors`
+4. Add description: `Adding myself to the README`
+5. Click **Create pull request**
+
+#### Step 7: Get Reviewed & Merge (5 min)
+
+- Wait for a teammate to approve (we'll do this together)
+- Once approved, click **Merge pull request**
+- Click **Delete branch** (cleanup)
+
+#### Step 8: Sync Your Local (1 min)
+
+```bash
+git checkout main
+git pull origin main
+```
+
+---
+
+### Quick Reference Card
+
+| What you want to do | Command |
+|---------------------|---------|
+| See current branch | `git branch` |
+| See changes | `git status` |
+| Create new branch | `git checkout -b branch-name` |
+| Switch branches | `git checkout branch-name` |
+| Stage all changes | `git add .` |
+| Commit | `git commit -m "message"` |
+| Push | `git push origin branch-name` |
+| Get latest main | `git checkout main && git pull` |
+
+---
+
+### The Golden Rule
+
+```
+main → branch → changes → push → PR → review → merge
+```
+
+**Never push directly to main. Always use a PR.**
 
 ---
 
