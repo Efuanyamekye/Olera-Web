@@ -14,12 +14,22 @@ interface InquiryButtonProps {
   providerSlug: string;
 }
 
+function generateSlug(name: string): string {
+  const base = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const suffix = Math.random().toString(36).substring(2, 6);
+  return `family-${base}-${suffix}`;
+}
+
 export default function InquiryButton({
   providerProfileId,
   providerName,
   providerSlug,
 }: InquiryButtonProps) {
-  const { user, account, activeProfile, openAuthModal } = useAuth();
+  const { user, account, activeProfile, openAuthModal, refreshAccountData } =
+    useAuth();
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -48,9 +58,68 @@ export default function InquiryButton({
     checkExisting();
   }, [user, activeProfile, providerProfileId]);
 
+  /**
+   * Ensure the user has a family profile to send inquiries from.
+   * If they signed up through the inquiry flow (skipping onboarding),
+   * auto-create a minimal family profile so the inquiry can proceed.
+   */
+  const ensureFamilyProfile = useCallback(
+    async (
+      supabase: ReturnType<typeof createClient>,
+      userAccount: NonNullable<typeof account>
+    ): Promise<string> => {
+      // If they already have an active profile, use it
+      if (activeProfile) return activeProfile.id;
+
+      // Create a minimal family profile
+      const displayName =
+        userAccount.display_name || user?.email?.split("@")[0] || "Family";
+      const slug = generateSlug(displayName);
+
+      const { data: newProfile, error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          account_id: userAccount.id,
+          slug,
+          type: "family",
+          category: null,
+          display_name: displayName,
+          care_types: [],
+          claim_state: "claimed",
+          verification_state: "unverified",
+          source: "user_created",
+          metadata: {},
+        })
+        .select("id")
+        .single();
+
+      if (profileError) throw new Error(profileError.message);
+
+      // Set as active profile
+      const { error: updateError } = await supabase
+        .from("accounts")
+        .update({
+          active_profile_id: newProfile.id,
+          onboarding_completed: true,
+        })
+        .eq("id", userAccount.id);
+
+      if (updateError) throw new Error(updateError.message);
+
+      // Refresh auth context so activeProfile is populated
+      await refreshAccountData();
+
+      return newProfile.id;
+    },
+    [activeProfile, user, refreshAccountData]
+  );
+
   const submitInquiry = useCallback(
     async (inquiryMessage: string) => {
-      if (!account || !activeProfile) return;
+      if (!account) {
+        setError("Please sign in to send an inquiry.");
+        return;
+      }
       if (!isSupabaseConfigured()) return;
 
       setSubmitting(true);
@@ -59,10 +128,13 @@ export default function InquiryButton({
       try {
         const supabase = createClient();
 
+        // Ensure we have a profile to send from
+        const fromProfileId = await ensureFamilyProfile(supabase, account);
+
         const { error: insertError } = await supabase
           .from("connections")
           .insert({
-            from_profile_id: activeProfile.id,
+            from_profile_id: fromProfileId,
             to_profile_id: providerProfileId,
             type: "inquiry",
             status: "pending",
@@ -70,7 +142,10 @@ export default function InquiryButton({
           });
 
         if (insertError) {
-          if (insertError.message.includes("duplicate") || insertError.message.includes("unique")) {
+          if (
+            insertError.message.includes("duplicate") ||
+            insertError.message.includes("unique")
+          ) {
             setAlreadySent(true);
             setShowModal(false);
             return;
@@ -90,18 +165,20 @@ export default function InquiryButton({
           err && typeof err === "object" && "message" in err
             ? (err as { message: string }).message
             : String(err);
-        setError(msg);
+        console.error("Inquiry error:", msg);
+        setError(`Something went wrong: ${msg}`);
       } finally {
         setSubmitting(false);
       }
     },
-    [account, activeProfile, providerProfileId]
+    [account, ensureFamilyProfile, providerProfileId]
   );
 
-  // Auto-trigger inquiry after returning from auth
+  // Auto-open inquiry modal after returning from auth
+  // Only requires user + account (not activeProfile — we'll create one on submit)
   useEffect(() => {
     if (autoInquiryTriggered.current) return;
-    if (!user || !account || !activeProfile) return;
+    if (!user || !account) return;
 
     const deferred = getDeferredAction();
     if (
@@ -110,10 +187,9 @@ export default function InquiryButton({
     ) {
       autoInquiryTriggered.current = true;
       clearDeferredAction();
-      // Show the modal so they can write a message
       setShowModal(true);
     }
-  }, [user, account, activeProfile, providerProfileId]);
+  }, [user, account, providerProfileId]);
 
   const handleClick = () => {
     if (!user) {
