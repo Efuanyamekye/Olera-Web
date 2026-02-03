@@ -153,7 +153,7 @@ export default function HomePage() {
                 </div>
                 <button
                   type="submit"
-                  className="bg-warm-500 hover:bg-warm-600 text-white font-semibold px-8 py-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg"
+                  className="bg-warm-700 hover:bg-warm-800 text-white font-semibold px-8 py-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg"
                 >
                   <svg
                     className="w-5 h-5"
@@ -230,13 +230,19 @@ export default function HomePage() {
               Top providers near you
             </h2>
             <div className="flex gap-2">
-              <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-300 hover:text-gray-600 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button
+                className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-300 hover:text-gray-600 transition-colors focus-ring"
+                aria-label="Previous providers"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-10 h-10 rounded-full border border-primary-600 flex items-center justify-center text-primary-600 hover:bg-primary-50 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button
+                className="w-11 h-11 rounded-full border border-primary-600 flex items-center justify-center text-primary-600 hover:bg-primary-50 transition-colors focus-ring"
+                aria-label="Next providers"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>

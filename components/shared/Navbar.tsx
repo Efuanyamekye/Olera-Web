@@ -22,13 +22,13 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/browse"
-              className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus-ring"
             >
               Browse Care
             </Link>
             <Link
               href="/for-providers"
-              className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus-ring"
             >
               For Providers
             </Link>
@@ -38,11 +38,11 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/auth/login"
-              className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus-ring"
             >
               Log In
             </Link>
-            <Link href="/auth/signup" className="btn-primary text-sm py-2 px-4">
+            <Link href="/auth/signup" className="btn-primary text-base">
               Get Started
             </Link>
           </div>

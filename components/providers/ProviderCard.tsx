@@ -47,12 +47,16 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
           </div>
         )}
         {/* Favorite Button */}
-        <button className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors">
+        <button
+          className="absolute top-3 right-3 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors focus-ring"
+          aria-label={`Save ${provider.name}`}
+        >
           <svg
             className="w-5 h-5 text-gray-400 hover:text-primary-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -84,11 +88,11 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
         </div>
 
         {/* Address */}
-        <p className="text-gray-500 text-sm mt-1">{provider.address}</p>
+        <p className="text-gray-500 text-base mt-1">{provider.address}</p>
 
         {/* Price */}
         <div className="mt-3">
-          <p className="text-gray-500 text-xs">Estimated Pricing</p>
+          <p className="text-gray-500 text-sm">Estimated Pricing</p>
           <p className="text-gray-900 font-semibold">{provider.priceRange}</p>
         </div>
 
@@ -112,9 +116,9 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
         {/* CTA Button */}
         <Link
           href={`/provider/${provider.slug}`}
-          className="mt-4 w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center"
+          className="mt-4 w-full btn-primary text-base"
         >
-          Go to provider page
+          View provider
         </Link>
       </div>
     </div>
