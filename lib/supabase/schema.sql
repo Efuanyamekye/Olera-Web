@@ -244,9 +244,38 @@ create policy "Users can update own profiles"
     )
   );
 
+-- PROFILES: users can claim unclaimed profiles (update where account_id is null)
+create policy "Users can claim unclaimed profiles"
+  on public.profiles for update
+  using (
+    claim_state = 'unclaimed'
+    and account_id is null
+    and auth.uid() is not null
+  );
+
 -- MEMBERSHIPS: users can only read their own
 create policy "Users can read own membership"
   on public.memberships for select
+  using (
+    exists (
+      select 1 from public.accounts
+      where accounts.user_id = auth.uid()
+      and accounts.id = memberships.account_id
+    )
+  );
+
+create policy "Users can insert own membership"
+  on public.memberships for insert
+  with check (
+    exists (
+      select 1 from public.accounts
+      where accounts.user_id = auth.uid()
+      and accounts.id = account_id
+    )
+  );
+
+create policy "Users can update own membership"
+  on public.memberships for update
   using (
     exists (
       select 1 from public.accounts

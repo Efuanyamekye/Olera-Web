@@ -178,9 +178,12 @@ export default function OnboardingPage() {
       } else {
         router.push("/portal");
       }
-    } catch (err) {
-      console.error("Onboarding error:", err);
-      setError("Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      const message = err && typeof err === "object" && "message" in err
+        ? (err as { message: string }).message
+        : String(err);
+      console.error("Onboarding error:", message, err);
+      setError(`Something went wrong: ${message}`);
       setSubmitting(false);
     }
   };
