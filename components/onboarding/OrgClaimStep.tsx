@@ -26,23 +26,38 @@ export default function OrgClaimStep({
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState("");
 
   const search = useCallback(async (query: string) => {
     if (!query.trim() || !isSupabaseConfigured()) return;
     setSearching(true);
+    setSearchError("");
 
-    const supabase = createClient();
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("type", "organization")
-      .eq("claim_state", "unclaimed")
-      .ilike("display_name", `%${query.trim()}%`)
-      .limit(10);
+    try {
+      const supabase = createClient();
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("type", "organization")
+        .eq("claim_state", "unclaimed")
+        .ilike("display_name", `%${query.trim()}%`)
+        .limit(10);
 
-    setResults((profiles as Profile[]) || []);
-    setHasSearched(true);
-    setSearching(false);
+      if (error) {
+        console.error("Org search error:", error.message);
+        setSearchError("Search failed. You can still create a new profile below.");
+        setResults([]);
+      } else {
+        setResults((profiles as Profile[]) || []);
+      }
+    } catch (err) {
+      console.error("Org search error:", err);
+      setSearchError("Search failed. You can still create a new profile below.");
+      setResults([]);
+    } finally {
+      setHasSearched(true);
+      setSearching(false);
+    }
   }, []);
 
   // Auto-search on mount with org name from previous step
@@ -85,6 +100,12 @@ export default function OrgClaimStep({
           </Button>
         </div>
       </form>
+
+      {searchError && (
+        <div className="mb-6 bg-warm-50 text-warm-700 px-4 py-3 rounded-lg text-base" role="alert">
+          {searchError}
+        </div>
+      )}
 
       {/* Search results */}
       {hasSearched && (
