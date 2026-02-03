@@ -382,24 +382,18 @@ function SocialProofSection() {
   );
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-gray-50 via-white to-white overflow-hidden relative">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-100/40 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-warm-100/40 rounded-full blur-3xl" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <section className="py-16 md:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <p className="text-primary-600 font-semibold text-sm uppercase tracking-wider mb-3">Trusted nationwide</p>
+        <div className="text-center mb-6">
+          <p className="text-primary-600 font-semibold text-sm uppercase tracking-wider mb-2">Trusted nationwide</p>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Helping families find care, every day
+            Helping families find care
           </h2>
         </div>
 
         {/* Stats Row */}
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 max-w-4xl mx-auto">
+        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {/* Stat 1 */}
           <div className="text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-sm hover:shadow-md hover:border-primary-100 transition-all duration-300 group">
             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-100 to-primary-50 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -407,7 +401,7 @@ function SocialProofSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <p className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight tabular-nums">
+            <p className="text-4xl md:text-5xl font-semibold text-gray-900 tracking-tight tabular-nums">
               {providersCount.toLocaleString()}+
             </p>
             <p className="mt-2 text-gray-500 text-base font-medium">care providers</p>
@@ -420,7 +414,7 @@ function SocialProofSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </div>
-            <p className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight tabular-nums">
+            <p className="text-4xl md:text-5xl font-semibold text-gray-900 tracking-tight tabular-nums">
               {familiesCount.toLocaleString()}+
             </p>
             <p className="mt-2 text-gray-500 text-base font-medium">families helped</p>
@@ -434,42 +428,105 @@ function SocialProofSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <p className="text-4xl md:text-5xl font-bold text-primary-600 tracking-tight tabular-nums">
+            <p className="text-4xl md:text-5xl font-semibold text-primary-600 tracking-tight tabular-nums">
               {citiesCount.toLocaleString()}+
             </p>
             <p className="mt-2 text-gray-500 text-base font-medium">cities covered</p>
           </div>
         </div>
 
-      </div>
+        {/* Video Card */}
+        <div className="mt-6 relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden">
+          {/* Diagonal stripe pattern overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 11px
+              )`
+            }}
+          />
 
-      {/* Scrolling Tags - Full width, no fades */}
-      <div className="mt-12">
-        {/* Scrolling Tags - Row 1 (scrolls left) */}
-        <div className="mb-3">
-          <div className="flex animate-scroll-left">
-            {[...scrollingTags.row1, ...scrollingTags.row1].map((tag, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center bg-white border border-gray-200 px-5 py-2.5 rounded-full text-sm font-medium text-gray-700 whitespace-nowrap mx-2 shadow-sm hover:shadow hover:border-primary-200 hover:text-primary-700 transition-all duration-200 cursor-default"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
+          {/* Teal glow effect behind video area */}
+          <div className="absolute top-1/2 right-0 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl transform translate-x-1/4 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-primary-400/10 rounded-full blur-2xl" />
 
-        {/* Scrolling Tags - Row 2 (scrolls right) */}
-        <div>
-          <div className="flex animate-scroll-right">
-            {[...scrollingTags.row2, ...scrollingTags.row2].map((tag, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center bg-white border border-gray-200 px-5 py-2.5 rounded-full text-sm font-medium text-gray-700 whitespace-nowrap mx-2 shadow-sm hover:shadow hover:border-primary-200 hover:text-primary-700 transition-all duration-200 cursor-default"
-              >
-                {tag}
-              </span>
-            ))}
+          {/* Decorative elements */}
+          <div className="absolute top-12 left-12 w-20 h-20 border border-white/10 rounded-full" />
+          <div className="absolute top-16 left-16 w-12 h-12 border border-primary-500/20 rounded-full" />
+          <div className="absolute bottom-12 left-1/4 w-2 h-2 bg-primary-400/40 rounded-full" />
+          <div className="absolute bottom-20 left-1/3 w-1.5 h-1.5 bg-white/20 rounded-full" />
+
+          <div className="relative flex items-center justify-center p-8 md:p-12 lg:p-16">
+            <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 w-full max-w-6xl">
+              {/* Left side - Text content */}
+              <div className="flex flex-col lg:w-[40%]">
+                {/* Chapter badge */}
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="inline-flex items-center gap-1.5 bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-semibold px-3 py-1.5 rounded-full">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    </svg>
+                    Chapter 1
+                  </span>
+                  <span className="text-gray-500 text-sm">Documentary Series</span>
+                </div>
+
+                <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                  Aging in America
+                </h3>
+
+                <p className="text-gray-400 text-base mb-8 max-w-sm leading-relaxed">
+                  Explore the realities of senior care in America and discover how families navigate finding the right care.
+                </p>
+
+                <div className="flex flex-col sm:flex-row sm:items-center items-start gap-4">
+                  <Link
+                    href="/browse"
+                    className="group inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-6 py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:scale-[1.02]"
+                  >
+                    Start Your Search
+                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  <Link
+                    href="https://youtube.com/@olera"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm font-medium transition-colors"
+                  >
+                    Watch more chapters
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right side - YouTube Video */}
+              <div className="lg:w-[60%]">
+                <div className="relative w-full group">
+                  {/* Glow ring around video */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500/50 via-primary-400/30 to-primary-500/50 rounded-2xl blur-sm opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+
+                  {/* Video container */}
+                  <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black ring-1 ring-white/10">
+                    <iframe
+                      src="https://www.youtube.com/embed/TiVrqkrYhEc"
+                      title="Aging in America - Chapter 1"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -503,7 +560,7 @@ function BrowseByCareTypeSection() {
   const selectedProviders = selectedCategory ? providersByCategory[selectedCategory] || [] : [];
 
   return (
-    <section className="pt-16 md:pt-24 pb-6 md:pb-10 bg-white">
+    <section className="pt-16 md:pt-24 pb-6 md:pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6">
@@ -563,7 +620,9 @@ function BrowseByCareTypeSection() {
             {/* Provider Grid - 6 cards in 3 columns, 2 rows */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {selectedProviders.slice(0, 6).map((provider) => (
-                <ProviderCard key={provider.id} provider={provider} />
+                <div key={provider.id} className="h-[512px]">
+                  <ProviderCard provider={provider} />
+                </div>
               ))}
             </div>
 
@@ -645,25 +704,25 @@ export default function HomePage() {
   };
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative text-white overflow-hidden">
-        {/* Background Image - Caregiver with senior, warm home setting */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/hero.png')"
-          }}
-        />
-        {/* Overlay for text readability */}
-        <div className="absolute inset-0 bg-black/55" />
+    <div className="bg-[#FFFEF8]">
+      {/* Hero Section - Full Image Background */}
+      <section className="pt-4 pb-8">
+        <div className="mx-4 sm:mx-6 lg:mx-8">
+          <div className="relative rounded-[2rem] min-h-[75vh] flex items-center px-8 md:px-16 lg:px-20 py-16 md:py-20 overflow-hidden">
+            {/* Background Image */}
+            <img
+              src="/hero.png"
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {/* Warm gradient overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-warm-950/85 via-warm-900/70 to-warm-900/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-warm-950/50 via-transparent to-warm-900/20" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-          <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
-            {/* Stack 1: Social Proof Pill + Headline + Subtitle */}
-            <div className="mb-10">
+            {/* Content */}
+            <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col items-center text-center">
               {/* Social Proof Pill */}
-              <div className="inline-flex items-center gap-2.5 bg-white/15 backdrop-blur-md border border-white/20 px-5 py-2.5 rounded-full text-sm font-medium text-white mb-6 shadow-lg">
+              <div className="inline-flex items-center gap-2.5 bg-white/15 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full text-sm font-medium text-white mb-6">
                 <span className="flex items-center justify-center w-5 h-5 bg-primary-500 rounded-full">
                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -672,167 +731,171 @@ export default function HomePage() {
                 <span>48,000+ care providers</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-[80px] font-bold leading-tight text-white">
                 Find the right care
                 <br />
                 <span className="text-primary-200">for your loved one</span>
               </h1>
-              <p className="mt-3 text-lg md:text-xl text-primary-100/90 max-w-xl mx-auto">
-                Compare trusted providers. Free, no pressure.
-              </p>
-            </div>
 
-            {/* Stack 2: Search Bar */}
-            <div className="w-full">
-              <form onSubmit={handleSearch}>
-              {/* White outer container with slight border radius */}
-              <div className="bg-white shadow-2xl w-full max-w-4xl mx-auto p-2.5 flex flex-col md:flex-row md:items-center gap-2.5 rounded-xl">
-                {/* Location Input - Gray pill */}
-                <div className="flex-1 flex items-center px-4 py-3.5 bg-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                  <svg
-                    className="w-5 h-5 text-gray-500 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Where are you looking?"
-                    className="w-full ml-3 bg-transparent border-none text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-base font-medium"
-                  />
-                  <svg
-                    className="w-4 h-4 text-gray-400 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+              {/* Search Bar */}
+              <div className="mt-8 w-full max-w-3xl">
+                <form onSubmit={handleSearch}>
+                  <div className="bg-white/95 backdrop-blur-sm shadow-2xl p-3 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl">
+                    {/* Location Input */}
+                    <div className="flex-1 flex items-center px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                      <svg
+                        className="w-5 h-5 text-gray-400 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="City or ZIP code"
+                        className="w-full ml-3 bg-transparent border-none text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-base"
+                      />
+                    </div>
 
-                {/* Care Type Dropdown - Gray pill */}
-                <div className="flex-1 flex items-center px-4 py-3.5 bg-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                  <svg
-                    className="w-5 h-5 text-gray-500 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <select
-                    value={careType}
-                    onChange={(e) => setCareType(e.target.value)}
-                    className="w-full ml-3 bg-transparent border-none text-gray-900 focus:outline-none focus:ring-0 text-base font-medium cursor-pointer appearance-none"
-                  >
-                    {careTypeOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="w-4 h-4 text-gray-400 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                    {/* Care Type Dropdown */}
+                    <div className="flex-1 flex items-center px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                      <svg
+                        className="w-5 h-5 text-gray-400 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
+                      </svg>
+                      <select
+                        value={careType}
+                        onChange={(e) => setCareType(e.target.value)}
+                        className="w-full ml-3 bg-transparent border-none text-gray-900 focus:outline-none focus:ring-0 text-base cursor-pointer appearance-none"
+                      >
+                        {careTypeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <svg
+                        className="w-4 h-4 text-gray-400 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
 
-                {/* Search Button - Colored pill */}
-                <button
-                  type="submit"
-                  className="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-base px-6 py-3.5 rounded-lg transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 md:min-w-[110px]"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <span className="hidden md:inline">Search</span>
-                </button>
+                    {/* Search Button */}
+                    <button
+                      type="submit"
+                      className="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-base px-6 py-3 rounded-xl shadow-lg shadow-primary-600/25 transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <span>Search</span>
+                    </button>
+                  </div>
+                </form>
               </div>
-              </form>
             </div>
           </div>
         </div>
       </section>
 
       {/* Top Providers Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="pt-8 md:pt-12 pb-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header with title and arrows */}
+          {/* Header with title and View All button */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
               Top providers near you
             </h2>
-            <div className="flex gap-2">
-              <button
-                onClick={scrollLeft_handler}
-                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors ${
-                  canScrollLeft
-                    ? "border-primary-600 text-primary-600 hover:bg-primary-50"
-                    : "border-gray-200 text-gray-300"
-                }`}
-                aria-label="Scroll left"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={scrollRight_handler}
-                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors ${
-                  canScrollRight
-                    ? "border-primary-600 text-primary-600 hover:bg-primary-50"
-                    : "border-gray-200 text-gray-300"
-                }`}
-                aria-label="Scroll right"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+            <Link
+              href="/browse"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+            >
+              View all providers
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Provider Cards - Horizontal Scroll with Side Arrows */}
+          <div className="relative overflow-visible">
+            {/* Left Arrow */}
+            <button
+              onClick={scrollLeft_handler}
+              disabled={!canScrollLeft}
+              className={`hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-200 items-center justify-center transition-all ${
+                canScrollLeft
+                  ? "hover:bg-gray-50 hover:shadow-2xl hover:scale-105 cursor-pointer"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
+              aria-label="Scroll left"
+            >
+              <svg className={`w-6 h-6 ${canScrollLeft ? "text-gray-700" : "text-gray-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Right Arrow */}
+            <button
+              onClick={scrollRight_handler}
+              disabled={!canScrollRight}
+              className={`hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-200 items-center justify-center transition-all ${
+                canScrollRight
+                  ? "hover:bg-gray-50 hover:shadow-2xl hover:scale-105 cursor-pointer"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
+              aria-label="Scroll right"
+            >
+              <svg className={`w-6 h-6 ${canScrollRight ? "text-gray-700" : "text-gray-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Scrollable Container */}
+            <div
+              ref={scrollContainerRef}
+              className="flex gap-5 overflow-x-scroll pb-4 scrollbar-hide"
+            >
+              {topProviders.map((provider) => (
+                <div key={provider.id} className="flex-shrink-0 w-[370px] h-[512px]">
+                  <ProviderCard provider={provider} />
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Provider Cards - Horizontal Scroll */}
-          <div
-            ref={scrollContainerRef}
-            className="flex gap-5 overflow-x-scroll pb-4 scrollbar-hide"
-          >
-            {topProviders.map((provider) => (
-              <div key={provider.id} className="flex-shrink-0 w-[370px] h-[512px]">
-                <ProviderCard provider={provider} />
-              </div>
-            ))}
-          </div>
-
-          {/* View all link */}
-          <div className="mt-6 text-center">
+          {/* Mobile View All button */}
+          <div className="mt-6 text-center sm:hidden">
             <Link
               href="/browse"
-              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               View all providers
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -849,107 +912,8 @@ export default function HomePage() {
       {/* Browse by Care Type Section */}
       <BrowseByCareTypeSection />
 
-      {/* Featured Video Section - Connected to Browse by Care Type */}
-      <section className="pt-4 md:pt-6 pb-16 md:pb-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden">
-            {/* Diagonal stripe pattern overlay */}
-            <div
-              className="absolute inset-0 opacity-[0.03]"
-              style={{
-                backgroundImage: `repeating-linear-gradient(
-                  -45deg,
-                  transparent,
-                  transparent 10px,
-                  rgba(255,255,255,0.1) 10px,
-                  rgba(255,255,255,0.1) 11px
-                )`
-              }}
-            />
-
-            {/* Teal glow effect behind video area */}
-            <div className="absolute top-1/2 right-0 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl transform translate-x-1/4 -translate-y-1/2" />
-            <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-primary-400/10 rounded-full blur-2xl" />
-
-            {/* Decorative elements */}
-            <div className="absolute top-12 left-12 w-20 h-20 border border-white/10 rounded-full" />
-            <div className="absolute top-16 left-16 w-12 h-12 border border-primary-500/20 rounded-full" />
-            <div className="absolute bottom-12 left-1/4 w-2 h-2 bg-primary-400/40 rounded-full" />
-            <div className="absolute bottom-20 left-1/3 w-1.5 h-1.5 bg-white/20 rounded-full" />
-
-            <div className="relative flex items-center justify-center p-8 md:p-12 lg:p-16">
-              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 w-full max-w-6xl">
-                {/* Left side - Text content */}
-                <div className="flex flex-col lg:w-[40%]">
-                  {/* Chapter badge */}
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="inline-flex items-center gap-1.5 bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-semibold px-3 py-1.5 rounded-full">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                      </svg>
-                      Chapter 1
-                    </span>
-                    <span className="text-gray-500 text-sm">Documentary Series</span>
-                  </div>
-
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
-                    Aging in America
-                  </h2>
-
-                  <p className="text-gray-400 text-base mb-8 max-w-sm leading-relaxed">
-                    Explore the realities of senior care in America and discover how families navigate finding the right care.
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center items-start gap-4">
-                    <Link
-                      href="/browse"
-                      className="group inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-6 py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:scale-[1.02]"
-                    >
-                      Start Your Search
-                      <svg className="w-5 h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                    <Link
-                      href="https://youtube.com/@olera"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm font-medium transition-colors"
-                    >
-                      Watch more chapters
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right side - YouTube Video */}
-                <div className="lg:w-[60%]">
-                  <div className="relative w-full group">
-                    {/* Glow ring around video */}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500/50 via-primary-400/30 to-primary-500/50 rounded-2xl blur-sm opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-
-                    {/* Video container */}
-                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black ring-1 ring-white/10">
-                      <iframe
-                        src="https://www.youtube.com/embed/TiVrqkrYhEc"
-                        title="Aging in America - Chapter 1"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* How It Works Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -998,7 +962,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-secondary-50">
+      <section className="py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
             Ready to Start Your Search?
