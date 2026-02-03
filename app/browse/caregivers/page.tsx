@@ -152,15 +152,9 @@ function CaregiverCard({
     </div>
   );
 
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5 transition-all duration-200">
-      {hasAccess && caregiver.slug ? (
-        <Link href={`/provider/${caregiver.slug}`} target="_blank" className="block hover:opacity-80 transition-opacity">
-          {cardHeader}
-        </Link>
-      ) : (
-        cardHeader
-      )}
+  const cardBody = (
+    <>
+      {cardHeader}
 
       {experience && (
         <p className="text-base text-gray-600 mb-2">
@@ -211,8 +205,26 @@ function CaregiverCard({
         </p>
       )}
 
+      {hasAccess && (
+        <p className="mt-3 text-primary-600 font-medium text-sm">
+          View profile &rarr;
+        </p>
+      )}
+    </>
+  );
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+      {hasAccess && caregiver.slug ? (
+        <Link href={`/provider/${caregiver.slug}`} target="_blank" className="block p-6">
+          {cardBody}
+        </Link>
+      ) : (
+        <div className="p-6">{cardBody}</div>
+      )}
+
       {hasAccess && fromProfileId && (
-        <div className="mt-3">
+        <div className="px-6 pb-6 -mt-2">
           <ConnectButton
             fromProfileId={fromProfileId}
             toProfileId={caregiver.id}

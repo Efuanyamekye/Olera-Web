@@ -294,61 +294,69 @@ function ConnectionCard({
   const shouldBlur = isProvider && !hasFullAccess && isInbound;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3 flex-wrap mb-1">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {shouldBlur ? blurName(otherName) : otherName}
-            </h3>
-            <Badge variant={badge.variant}>{badge.label}</Badge>
-            <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
-              {typeLabel}
-            </span>
-          </div>
-
-          {otherLocation && (
-            <p className="text-base text-gray-500 mb-2">
-              {shouldBlur ? "***" : otherLocation}
-            </p>
-          )}
-
-          {/* Other profile's type */}
-          {otherProfile && (
-            <p className="text-sm text-gray-400 mb-2">
-              {otherProfile.type === "organization"
-                ? "Organization"
-                : otherProfile.type === "caregiver"
-                ? "Caregiver"
-                : "Family"}
-            </p>
-          )}
-
-          {/* Message / note */}
-          {connection.message && (
-            <div className="mt-3 bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-500 mb-1">Note:</p>
-              <p className="text-base text-gray-700">
-                {shouldBlur
-                  ? blurText(connection.message)
-                  : connection.message}
-              </p>
+    <div className="bg-white rounded-xl border border-gray-200 hover:shadow-sm hover:border-gray-300 transition-all duration-150">
+      <Link
+        href={`/portal/connections/${connection.id}`}
+        className="block p-6"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-3 flex-wrap mb-1">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {shouldBlur ? blurName(otherName) : otherName}
+              </h3>
+              <Badge variant={badge.variant}>{badge.label}</Badge>
+              <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
+                {typeLabel}
+              </span>
             </div>
-          )}
 
-          {shouldBlur && (
-            <p className="mt-3 text-sm text-warm-600 font-medium">
-              Upgrade to Pro to see full details and respond.
-            </p>
-          )}
+            {otherLocation && (
+              <p className="text-base text-gray-500 mb-2">
+                {shouldBlur ? "***" : otherLocation}
+              </p>
+            )}
 
-          <p className="text-sm text-gray-400 mt-3">{createdAt}</p>
+            {otherProfile && (
+              <p className="text-sm text-gray-400 mb-2">
+                {otherProfile.type === "organization"
+                  ? "Organization"
+                  : otherProfile.type === "caregiver"
+                  ? "Caregiver"
+                  : "Family"}
+              </p>
+            )}
+
+            {connection.message && (
+              <div className="mt-3 bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-500 mb-1">Note:</p>
+                <p className="text-base text-gray-700">
+                  {shouldBlur
+                    ? blurText(connection.message)
+                    : connection.message}
+                </p>
+              </div>
+            )}
+
+            {shouldBlur && (
+              <p className="mt-3 text-sm text-warm-600 font-medium">
+                Upgrade to Pro to see full details and respond.
+              </p>
+            )}
+
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-gray-400">{createdAt}</p>
+              <span className="text-sm text-primary-600 font-medium">
+                View details &rarr;
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      </Link>
 
-      {/* Action buttons for inbound connections with access */}
+      {/* Quick actions — outside the link to avoid nested interactives */}
       {isInbound && hasFullAccess && connection.status === "pending" && (
-        <div className="mt-4 flex gap-3">
+        <div className="px-6 pb-6 -mt-2 flex gap-3">
           <Button
             size="sm"
             onClick={() => onStatusUpdate(connection.id, "accepted")}
@@ -367,30 +375,49 @@ function ConnectionCard({
         </div>
       )}
 
-      {/* Accepted: show contact info */}
+      {/* Accepted: show quick contact + next steps */}
       {connection.status === "accepted" && otherProfile && (
-        <div className="mt-4 bg-primary-50 rounded-lg p-4">
-          <p className="text-base text-primary-800 font-medium mb-1">
-            Connection accepted
-          </p>
-          {otherProfile.phone && (
-            <p className="text-base text-primary-700">
-              Phone: {otherProfile.phone}
+        <div className="px-6 pb-6 -mt-2">
+          <div className="bg-primary-50 rounded-lg p-4">
+            <p className="text-base text-primary-800 font-medium mb-2">
+              Connection accepted — next steps
             </p>
-          )}
-          {otherProfile.email && (
-            <p className="text-base text-primary-700">
-              Email: {otherProfile.email}
-            </p>
-          )}
-          {otherProfile.slug && (
-            <Link
-              href={`/provider/${otherProfile.slug}`}
-              className="text-sm text-primary-600 hover:underline mt-2 inline-block"
-            >
-              View full profile
-            </Link>
-          )}
+            <div className="flex flex-wrap gap-2">
+              {otherProfile.phone && (
+                <a
+                  href={`tel:${otherProfile.phone}`}
+                  className="inline-flex items-center gap-1.5 bg-white text-primary-700 text-sm font-medium px-3 py-2 rounded-lg border border-primary-200 hover:bg-primary-100 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  Call
+                </a>
+              )}
+              {otherProfile.email && (
+                <a
+                  href={`mailto:${otherProfile.email}`}
+                  className="inline-flex items-center gap-1.5 bg-white text-primary-700 text-sm font-medium px-3 py-2 rounded-lg border border-primary-200 hover:bg-primary-100 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Email
+                </a>
+              )}
+              {otherProfile.slug && (
+                <Link
+                  href={`/provider/${otherProfile.slug}`}
+                  className="inline-flex items-center gap-1.5 bg-white text-primary-700 text-sm font-medium px-3 py-2 rounded-lg border border-primary-200 hover:bg-primary-100 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Profile
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

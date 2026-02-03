@@ -61,11 +61,12 @@ export default function Navbar() {
             <span className="text-xl font-bold text-gray-900">Olera</span>
           </Link>
 
-          {/* Desktop Navigation — care categories always visible, centered */}
+          {/* Desktop Navigation — care categories for families and unauthenticated users */}
           <div className="hidden lg:flex items-center space-x-4">
-            {NAV_CATEGORIES.map((cat) => (
-              <NavDropdown key={cat.label} category={cat} />
-            ))}
+            {(!isAuthenticated || isFamily) &&
+              NAV_CATEGORIES.map((cat) => (
+                <NavDropdown key={cat.label} category={cat} />
+              ))}
             {!isAuthenticated && (
               <>
                 <div className="w-px h-5 bg-gray-200" />
@@ -193,22 +194,13 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => openAuthModal(undefined, "sign-in")}
-                  className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAuthModal(undefined, "sign-up")}
-                  className="btn-primary text-base"
-                >
-                  Get Started
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => openAuthModal(undefined, "sign-in")}
+                className="text-[15px] text-gray-700 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
+              >
+                Log In
+              </button>
             )}
           </div>
 
@@ -254,14 +246,15 @@ export default function Navbar() {
         {isMobileMenuOpen && (
           <div className="lg:hidden py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-1">
-              {/* Care category accordions — always visible */}
-              {NAV_CATEGORIES.map((cat) => (
-                <MobileNavAccordion
-                  key={cat.label}
-                  category={cat}
-                  onNavigate={() => setIsMobileMenuOpen(false)}
-                />
-              ))}
+              {/* Care category accordions — for families and unauthenticated */}
+              {(!isAuthenticated || isFamily) &&
+                NAV_CATEGORIES.map((cat) => (
+                  <MobileNavAccordion
+                    key={cat.label}
+                    category={cat}
+                    onNavigate={() => setIsMobileMenuOpen(false)}
+                  />
+                ))}
               {!isAuthenticated && (
                 <Link
                   href="/for-providers"
@@ -335,28 +328,16 @@ export default function Navbar() {
                   </button>
                 </>
               ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      openAuthModal(undefined, "sign-in");
-                    }}
-                    className="text-left text-gray-600 hover:text-primary-600 font-medium"
-                  >
-                    Log In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      openAuthModal(undefined, "sign-up");
-                    }}
-                    className="btn-primary text-center"
-                  >
-                    Get Started
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openAuthModal(undefined, "sign-in");
+                  }}
+                  className="text-left text-gray-600 hover:text-primary-600 font-medium"
+                >
+                  Log In
+                </button>
               )}
             </div>
           </div>

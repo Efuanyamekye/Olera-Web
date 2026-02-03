@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import type { Profile } from "@/lib/types";
 
@@ -37,6 +38,7 @@ interface ProfileSwitcherProps {
 
 export default function ProfileSwitcher({ onSwitch, variant = "dropdown" }: ProfileSwitcherProps) {
   const { profiles, activeProfile, switchProfile } = useAuth();
+  const router = useRouter();
 
   const hasMultipleProfiles = profiles.length > 1;
 
@@ -44,6 +46,8 @@ export default function ProfileSwitcher({ onSwitch, variant = "dropdown" }: Prof
     if (profileId === activeProfile?.id) return;
     await switchProfile(profileId);
     onSwitch?.();
+    // Always navigate to dashboard after switching to avoid role mismatch on current page
+    router.push("/portal");
   };
 
   if (variant === "sidebar") {

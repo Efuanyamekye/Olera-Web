@@ -199,6 +199,52 @@ export default function ConnectionDetailPage() {
           </div>
         )}
 
+        {/* Next steps for accepted connections */}
+        {connection.status === "accepted" && otherProfile && (
+          <div className="mt-6 bg-primary-50 rounded-lg p-5">
+            <h3 className="text-base font-semibold text-primary-900 mb-3">
+              Next Steps
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {otherProfile.phone && (
+                <a
+                  href={`tel:${otherProfile.phone}`}
+                  className="inline-flex items-center gap-2 bg-white text-primary-700 font-medium px-4 py-2.5 rounded-lg border border-primary-200 hover:bg-primary-100 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  Call {otherProfile.display_name.split(" ")[0]}
+                </a>
+              )}
+              {otherProfile.email && (
+                <a
+                  href={`mailto:${otherProfile.email}`}
+                  className="inline-flex items-center gap-2 bg-white text-primary-700 font-medium px-4 py-2.5 rounded-lg border border-primary-200 hover:bg-primary-100 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Send Email
+                </a>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleStatusUpdate("archived" as "accepted")}
+                loading={responding}
+              >
+                Archive Connection
+              </Button>
+            </div>
+            {!otherProfile.phone && !otherProfile.email && (
+              <p className="text-sm text-primary-600 mt-2">
+                No contact information provided yet. Check back later or view their full profile.
+              </p>
+            )}
+          </div>
+        )}
+
         {shouldBlur && (
           <div className="mt-6">
             <UpgradePrompt context="view full profile details and respond" />

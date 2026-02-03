@@ -1,6 +1,31 @@
 import type { Membership, Profile } from "@/lib/types";
 
 /**
+ * Minimum profile completeness check.
+ * A profile must have at least a name, a location (city or state),
+ * and at least one care type before it can be shared.
+ */
+export function isProfileShareable(profile: Profile | null): boolean {
+  if (!profile) return false;
+  if (!profile.display_name?.trim()) return false;
+  if (!profile.city && !profile.state) return false;
+  if (profile.care_types.length === 0) return false;
+  return true;
+}
+
+/**
+ * Returns an array of missing fields for profile completeness.
+ */
+export function getProfileCompletionGaps(profile: Profile | null): string[] {
+  if (!profile) return ["profile"];
+  const gaps: string[] = [];
+  if (!profile.display_name?.trim()) gaps.push("display name");
+  if (!profile.city && !profile.state) gaps.push("location (city or state)");
+  if (profile.care_types.length === 0) gaps.push("care types");
+  return gaps;
+}
+
+/**
  * Engagement access rules.
  *
  * - Families always have full access (they never pay).

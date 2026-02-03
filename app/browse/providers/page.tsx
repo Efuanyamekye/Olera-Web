@@ -125,60 +125,66 @@ function OrgJobCard({
   const locationStr = [org.city, org.state].filter(Boolean).join(", ");
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5 transition-all duration-200">
-      {/* Image */}
-      <div className="relative h-36 bg-gray-200">
-        {org.image_url ? (
-          <img
-            src={org.image_url}
-            alt={org.display_name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-300 flex items-center justify-center">
-            <span className="text-3xl font-bold text-primary-600/40">
-              {org.display_name.charAt(0)}
-            </span>
-          </div>
-        )}
-      </div>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+      <Link href={`/provider/${org.slug}`} target="_blank" className="block">
+        {/* Image */}
+        <div className="relative h-36 bg-gray-200">
+          {org.image_url ? (
+            <img
+              src={org.image_url}
+              alt={org.display_name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-300 flex items-center justify-center">
+              <span className="text-3xl font-bold text-primary-600/40">
+                {org.display_name.charAt(0)}
+              </span>
+            </div>
+          )}
+        </div>
 
-      <div className="p-5">
-        <Link href={`/provider/${org.slug}`} target="_blank" className="hover:underline">
+        <div className="p-5">
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
             {org.display_name}
           </h3>
-        </Link>
 
-        {locationStr && (
-          <p className="text-sm text-gray-500 mb-2">{locationStr}</p>
-        )}
+          {locationStr && (
+            <p className="text-sm text-gray-500 mb-2">{locationStr}</p>
+          )}
 
-        {org.care_types.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {org.care_types.slice(0, 2).map((type) => (
-              <span
-                key={type}
-                className="bg-primary-50 text-primary-700 text-xs px-2.5 py-1 rounded-full"
-              >
-                {type}
-              </span>
-            ))}
-            {org.care_types.length > 2 && (
-              <span className="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-full">
-                +{org.care_types.length - 2} more
-              </span>
-            )}
-          </div>
-        )}
+          {org.care_types.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {org.care_types.slice(0, 2).map((type) => (
+                <span
+                  key={type}
+                  className="bg-primary-50 text-primary-700 text-xs px-2.5 py-1 rounded-full"
+                >
+                  {type}
+                </span>
+              ))}
+              {org.care_types.length > 2 && (
+                <span className="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-full">
+                  +{org.care_types.length - 2} more
+                </span>
+              )}
+            </div>
+          )}
 
-        {meta?.staff_count && (
-          <p className="text-sm text-gray-500 mb-3">
-            {meta.staff_count} staff members
+          {meta?.staff_count && (
+            <p className="text-sm text-gray-500 mb-3">
+              {meta.staff_count} staff members
+            </p>
+          )}
+
+          <p className="text-primary-600 font-medium text-sm">
+            View provider &rarr;
           </p>
-        )}
+        </div>
+      </Link>
 
-        {fromProfileId && (
+      {fromProfileId && (
+        <div className="px-5 pb-5 -mt-2">
           <ConnectButton
             fromProfileId={fromProfileId}
             toProfileId={org.id}
@@ -188,8 +194,8 @@ function OrgJobCard({
             sentLabel="Applied"
             fullWidth
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

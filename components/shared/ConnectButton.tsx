@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { canEngage } from "@/lib/membership";
-import type { ConnectionType } from "@/lib/types";
+import { canEngage, isProfileShareable, getProfileCompletionGaps } from "@/lib/membership";
+import type { ConnectionType, Membership } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 
@@ -49,7 +49,7 @@ export default function ConnectButton({
   fullWidth = false,
   size = "sm",
 }: ConnectButtonProps) {
-  const { user, activeProfile, membership, openAuthModal } = useAuth();
+  const { user, activeProfile, membership, openAuthModal, refreshAccountData } = useAuth();
   const [alreadySent, setAlreadySent] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [note, setNote] = useState("");
@@ -57,6 +57,10 @@ export default function ConnectButton({
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+
+  const profileShareable = isProfileShareable(activeProfile);
+  const completionGaps = !profileShareable ? getProfileCompletionGaps(activeProfile) : [];
 
   const hasEngageAccess = canEngage(
     activeProfile?.type,
@@ -114,6 +118,21 @@ export default function ConnectButton({
         throw new Error(insertError.message);
       }
 
+      // Increment free_responses_used for non-paid memberships
+      if (
+        membership &&
+        (membership.status === "free" || membership.status === "trialing")
+      ) {
+        const newCount = (membership.free_responses_used ?? 0) + 1;
+        await supabase
+          .from("memberships")
+          .update({ free_responses_used: newCount })
+          .eq("account_id", membership.account_id);
+
+        // Refresh auth state so canEngage re-evaluates with updated count
+        refreshAccountData();
+      }
+
       setSuccess(true);
       setAlreadySent(true);
       setTimeout(() => {
@@ -138,6 +157,12 @@ export default function ConnectButton({
       return;
     }
     if (alreadySent) return;
+
+    // Profile completeness check — must have minimum info before sharing
+    if (!profileShareable) {
+      setShowIncompleteModal(true);
+      return;
+    }
 
     // Paywall check — families always pass, providers need membership
     if (!hasEngageAccess) {
@@ -267,6 +292,37 @@ export default function ConnectButton({
           <p className="text-sm text-gray-500 mt-3">
             Plans start at $25/month
           </p>
+        </div>
+      </Modal>
+
+      {/* Incomplete profile modal */}
+      <Modal
+        isOpen={showIncompleteModal}
+        onClose={() => setShowIncompleteModal(false)}
+        title="Complete your profile first"
+        size="sm"
+      >
+        <div className="py-2">
+          <p className="text-base text-gray-600 mb-4">
+            Your profile needs a few more details before you can share it with others.
+          </p>
+          {completionGaps.length > 0 && (
+            <ul className="text-sm text-gray-600 mb-6 space-y-1">
+              {completionGaps.map((gap) => (
+                <li key={gap} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-warm-500 rounded-full shrink-0" />
+                  Add {gap}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            href="/portal/profile"
+            className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors min-h-[44px]"
+            onClick={() => setShowIncompleteModal(false)}
+          >
+            Edit Profile
+          </Link>
         </div>
       </Modal>
     </>
