@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/auth/AuthProvider";
+import ProfileSwitcher from "@/components/shared/ProfileSwitcher";
 import type { Profile } from "@/lib/types";
 
 interface PortalSidebarProps {
@@ -88,7 +90,9 @@ function getNavItems(profileType: string | undefined): NavItem[] {
 
 export default function PortalSidebar({ profile }: PortalSidebarProps) {
   const pathname = usePathname();
+  const { profiles } = useAuth();
   const navItems = getNavItems(profile?.type);
+  const hasMultipleProfiles = profiles.length > 1;
 
   return (
     <>
@@ -137,6 +141,13 @@ export default function PortalSidebar({ profile }: PortalSidebarProps) {
             );
           })}
         </nav>
+
+        {/* Profile switcher at bottom of sidebar */}
+        {hasMultipleProfiles && (
+          <div className="p-4 border-t border-gray-100">
+            <ProfileSwitcher variant="sidebar" />
+          </div>
+        )}
       </aside>
 
       {/* Mobile bottom nav */}

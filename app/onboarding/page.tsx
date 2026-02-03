@@ -40,7 +40,8 @@ const INITIAL_DATA: OnboardingData = {
 type Step = "intent" | "profile-info" | "org-claim";
 
 export default function OnboardingPage() {
-  const { user, account, refreshAccountData } = useAuth();
+  const { user, account, activeProfile, refreshAccountData } = useAuth();
+  const isAddingProfile = !!activeProfile;
   const router = useRouter();
   const [step, setStep] = useState<Step>("intent");
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
@@ -95,19 +96,23 @@ export default function OnboardingPage() {
 
         if (claimError) throw claimError;
 
-        // Set as active profile and mark onboarding complete
+        // Set as active profile (or keep current if adding a second profile)
+        const accountUpdate: Record<string, unknown> = {
+          onboarding_completed: true,
+          display_name: data.displayName || account.display_name,
+        };
+        if (!isAddingProfile) {
+          accountUpdate.active_profile_id = profileId;
+        }
+
         const { error: accountError } = await supabase
           .from("accounts")
-          .update({
-            active_profile_id: profileId,
-            onboarding_completed: true,
-            display_name: data.displayName || account.display_name,
-          })
+          .update(accountUpdate)
           .eq("id", account.id);
 
         if (accountError) throw accountError;
 
-        // Create membership for providers (trial)
+        // Create membership for providers (trial) — only if none exists
         if (data.intent !== "family") {
           await supabase.from("memberships").upsert({
             account_id: account.id,
@@ -145,19 +150,23 @@ export default function OnboardingPage() {
 
         if (profileError) throw profileError;
 
-        // Set as active profile and mark onboarding complete
+        // Set as active profile (or keep current if adding a second profile)
+        const newAccountUpdate: Record<string, unknown> = {
+          onboarding_completed: true,
+          display_name: data.displayName || account.display_name,
+        };
+        if (!isAddingProfile) {
+          newAccountUpdate.active_profile_id = newProfile.id;
+        }
+
         const { error: accountError } = await supabase
           .from("accounts")
-          .update({
-            active_profile_id: newProfile.id,
-            onboarding_completed: true,
-            display_name: data.displayName || account.display_name,
-          })
+          .update(newAccountUpdate)
           .eq("id", account.id);
 
         if (accountError) throw accountError;
 
-        // Create membership for providers (trial)
+        // Create membership for providers (trial) — only if none exists
         if (data.intent !== "family") {
           await supabase.from("memberships").upsert({
             account_id: account.id,
@@ -172,8 +181,10 @@ export default function OnboardingPage() {
 
       await refreshAccountData();
 
-      // Redirect based on role
-      if (data.intent === "family") {
+      // Redirect: if adding a second profile, go to portal; otherwise role-based
+      if (isAddingProfile) {
+        router.push("/portal");
+      } else if (data.intent === "family") {
         router.push("/browse");
       } else {
         router.push("/portal");

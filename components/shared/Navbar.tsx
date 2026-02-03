@@ -3,18 +3,22 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import ProfileSwitcher from "@/components/shared/ProfileSwitcher";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, account, activeProfile, isLoading, openAuthModal, signOut } =
+  const { user, account, activeProfile, profiles, isLoading, openAuthModal, signOut } =
     useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const isAuthenticated = !!user;
+  // Gate on account existence — not just user — to ensure data has loaded
+  const isAuthenticated = !!user && !!account;
+  const hasProfile = !!activeProfile;
   const isProvider =
     activeProfile?.type === "organization" ||
     activeProfile?.type === "caregiver";
+  const isFamily = activeProfile?.type === "family";
 
   // Close user menu on outside click
   useEffect(() => {
@@ -33,6 +37,14 @@ export default function Navbar() {
   const displayName =
     activeProfile?.display_name || account?.display_name || user?.email || "";
   const initials = getInitials(displayName);
+
+  const profileTypeLabel = activeProfile
+    ? activeProfile.type === "organization"
+      ? "Organization"
+      : activeProfile.type === "caregiver"
+      ? "Caregiver"
+      : "Family"
+    : null;
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -54,21 +66,38 @@ export default function Navbar() {
             >
               Browse Care
             </Link>
-            {isProvider ? (
+            {isProvider && (
               <Link
                 href="/browse/families"
                 className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
               >
                 Browse Families
               </Link>
-            ) : !isAuthenticated ? (
+            )}
+            {activeProfile?.type === "organization" && (
+              <Link
+                href="/browse/caregivers"
+                className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
+              >
+                Browse Caregivers
+              </Link>
+            )}
+            {activeProfile?.type === "caregiver" && (
+              <Link
+                href="/browse/providers"
+                className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
+              >
+                Find Jobs
+              </Link>
+            )}
+            {!isAuthenticated && (
               <Link
                 href="/for-providers"
                 className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
               >
                 For Providers
               </Link>
-            ) : null}
+            )}
           </div>
 
           {/* Desktop Auth */}
@@ -111,39 +140,65 @@ export default function Navbar() {
                       <p className="text-base font-medium text-gray-900 truncate">
                         {displayName}
                       </p>
+                      {profileTypeLabel && (
+                        <p className="text-xs text-primary-600 font-medium">
+                          {profileTypeLabel}
+                        </p>
+                      )}
                       <p className="text-sm text-gray-500 truncate">
                         {user?.email}
                       </p>
                     </div>
-                    <Link
-                      href="/portal"
-                      className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/portal/profile"
-                      className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Edit Profile
-                    </Link>
-                    <Link
-                      href="/portal/connections"
-                      className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      {isProvider ? "Connections" : "My Inquiries"}
-                    </Link>
-                    {isProvider && (
+                    {hasProfile ? (
+                      <>
+                        <Link
+                          href="/portal"
+                          className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                        <Link
+                          href="/portal/profile"
+                          className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          Edit Profile
+                        </Link>
+                        <Link
+                          href="/portal/connections"
+                          className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          {isProvider ? "Connections" : "My Inquiries"}
+                        </Link>
+                        {isProvider && (
+                          <Link
+                            href="/portal/settings"
+                            className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            Settings
+                          </Link>
+                        )}
+                      </>
+                    ) : (
                       <Link
-                        href="/portal/settings"
-                        className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                        href="/onboarding"
+                        className="block px-4 py-3 text-base text-primary-600 hover:bg-primary-50 transition-colors font-medium"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        Settings
+                        Complete your profile
                       </Link>
+                    )}
+                    {/* Profile switcher — only show if user has multiple profiles */}
+                    {profiles.length > 1 && (
+                      <div className="border-t border-gray-100 mt-1 pt-1">
+                        <ProfileSwitcher
+                          onSwitch={() => setIsUserMenuOpen(false)}
+                          variant="dropdown"
+                        />
+                      </div>
                     )}
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button
@@ -229,7 +284,7 @@ export default function Navbar() {
               >
                 Browse Care
               </Link>
-              {isProvider ? (
+              {isProvider && (
                 <Link
                   href="/browse/families"
                   className="text-gray-600 hover:text-primary-600 font-medium"
@@ -237,7 +292,26 @@ export default function Navbar() {
                 >
                   Browse Families
                 </Link>
-              ) : !isAuthenticated ? (
+              )}
+              {activeProfile?.type === "organization" && (
+                <Link
+                  href="/browse/caregivers"
+                  className="text-gray-600 hover:text-primary-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Browse Caregivers
+                </Link>
+              )}
+              {activeProfile?.type === "caregiver" && (
+                <Link
+                  href="/browse/providers"
+                  className="text-gray-600 hover:text-primary-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Find Jobs
+                </Link>
+              )}
+              {!isAuthenticated && (
                 <Link
                   href="/for-providers"
                   className="text-gray-600 hover:text-primary-600 font-medium"
@@ -245,38 +319,50 @@ export default function Navbar() {
                 >
                   For Providers
                 </Link>
-              ) : null}
+              )}
               <hr className="border-gray-100" />
               {isAuthenticated ? (
                 <>
-                  <Link
-                    href="/portal"
-                    className="text-gray-600 hover:text-primary-600 font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/portal/profile"
-                    className="text-gray-600 hover:text-primary-600 font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Edit Profile
-                  </Link>
-                  <Link
-                    href="/portal/connections"
-                    className="text-gray-600 hover:text-primary-600 font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {isProvider ? "Connections" : "My Inquiries"}
-                  </Link>
-                  {isProvider && (
+                  {hasProfile ? (
+                    <>
+                      <Link
+                        href="/portal"
+                        className="text-gray-600 hover:text-primary-600 font-medium"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/portal/profile"
+                        className="text-gray-600 hover:text-primary-600 font-medium"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Edit Profile
+                      </Link>
+                      <Link
+                        href="/portal/connections"
+                        className="text-gray-600 hover:text-primary-600 font-medium"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {isProvider ? "Connections" : "My Inquiries"}
+                      </Link>
+                      {isProvider && (
+                        <Link
+                          href="/portal/settings"
+                          className="text-gray-600 hover:text-primary-600 font-medium"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Settings
+                        </Link>
+                      )}
+                    </>
+                  ) : (
                     <Link
-                      href="/portal/settings"
-                      className="text-gray-600 hover:text-primary-600 font-medium"
+                      href="/onboarding"
+                      className="text-primary-600 hover:text-primary-700 font-medium"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Settings
+                      Complete your profile
                     </Link>
                   )}
                   <button

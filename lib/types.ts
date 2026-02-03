@@ -160,6 +160,7 @@ export interface AuthState {
   user: { id: string; email: string } | null;
   account: Account | null;
   activeProfile: Profile | null;
+  profiles: Profile[];
   membership: Membership | null;
   isLoading: boolean;
 }

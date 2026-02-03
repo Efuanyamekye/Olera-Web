@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { canEngage } from "@/lib/membership";
@@ -15,17 +16,26 @@ interface ConnectionWithProfile extends Connection {
   toProfile: Profile | null;
 }
 
+type TabKey = "all" | "inquiry" | "invitation" | "application";
+
+const TAB_LABELS: Record<TabKey, string> = {
+  all: "All",
+  inquiry: "Inquiries",
+  invitation: "Invitations",
+  application: "Applications",
+};
+
 export default function ConnectionsPage() {
   const { activeProfile, membership } = useAuth();
   const [connections, setConnections] = useState<ConnectionWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<TabKey>("all");
 
   const isProvider =
     activeProfile?.type === "organization" ||
     activeProfile?.type === "caregiver";
-  const isFamily = activeProfile?.type === "family";
 
   const hasFullAccess = canEngage(
     activeProfile?.type,
@@ -42,14 +52,12 @@ export default function ConnectionsPage() {
     try {
       const supabase = createClient();
 
-      // Providers see inbound inquiries (to_profile_id = their profile)
-      // Families see outbound inquiries (from_profile_id = their profile)
-      const column = isProvider ? "to_profile_id" : "from_profile_id";
+      // Fetch ALL connections involving this profile (inbound and outbound)
       const { data, error: fetchError } = await supabase
         .from("connections")
         .select("*")
-        .eq(column, activeProfile.id)
-        .eq("type", "inquiry")
+        .or(`to_profile_id.eq.${activeProfile.id},from_profile_id.eq.${activeProfile.id}`)
+        .neq("type", "save")
         .order("created_at", { ascending: false });
 
       if (fetchError) throw new Error(fetchError.message);
@@ -88,7 +96,7 @@ export default function ConnectionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeProfile, isProvider]);
+  }, [activeProfile]);
 
   useEffect(() => {
     fetchConnections();
@@ -98,7 +106,7 @@ export default function ConnectionsPage() {
     connectionId: string,
     newStatus: "accepted" | "declined" | "archived"
   ) => {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured() || !activeProfile) return;
 
     setResponding(connectionId);
     try {
@@ -106,11 +114,11 @@ export default function ConnectionsPage() {
       const { error: updateError } = await supabase
         .from("connections")
         .update({ status: newStatus })
-        .eq("id", connectionId);
+        .eq("id", connectionId)
+        .or(`to_profile_id.eq.${activeProfile.id},from_profile_id.eq.${activeProfile.id}`);
 
       if (updateError) throw new Error(updateError.message);
 
-      // Update local state
       setConnections((prev) =>
         prev.map((c) =>
           c.id === connectionId ? { ...c, status: newStatus } : c
@@ -127,6 +135,22 @@ export default function ConnectionsPage() {
     }
   };
 
+  // Filter connections by tab
+  const filtered =
+    activeTab === "all"
+      ? connections
+      : connections.filter((c) => c.type === activeTab);
+
+  // Determine which tabs to show based on what connection types exist
+  const typeCounts: Record<string, number> = {};
+  connections.forEach((c) => {
+    typeCounts[c.type] = (typeCounts[c.type] || 0) + 1;
+  });
+  const availableTabs: TabKey[] = ["all"];
+  if (typeCounts["inquiry"]) availableTabs.push("inquiry");
+  if (typeCounts["invitation"]) availableTabs.push("invitation");
+  if (typeCounts["application"]) availableTabs.push("application");
+
   if (loading) {
     return (
       <div className="text-center py-16">
@@ -142,8 +166,8 @@ export default function ConnectionsPage() {
         <h1 className="text-3xl font-bold text-gray-900">Connections</h1>
         <p className="text-lg text-gray-600 mt-1">
           {isProvider
-            ? "Inquiries from families looking for care."
-            : "Your inquiries to care providers."}
+            ? "Manage inquiries, invitations, and applications."
+            : "Your connections with care providers."}
         </p>
       </div>
 
@@ -156,21 +180,52 @@ export default function ConnectionsPage() {
         </div>
       )}
 
-      {connections.length === 0 ? (
+      {/* Tabs — only show if there are multiple types */}
+      {availableTabs.length > 2 && (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {availableTabs.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={[
+                "px-4 py-2 rounded-lg text-sm font-medium transition-colors min-h-[36px]",
+                activeTab === tab
+                  ? "bg-primary-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200",
+              ].join(" ")}
+            >
+              {TAB_LABELS[tab]}
+              {tab !== "all" && (
+                <span className="ml-1.5 text-xs opacity-75">
+                  ({typeCounts[tab] || 0})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
         <EmptyState
-          title={isProvider ? "No inquiries yet" : "No inquiries sent"}
+          title={
+            activeTab === "all"
+              ? "No connections yet"
+              : `No ${TAB_LABELS[activeTab].toLowerCase()} yet`
+          }
           description={
             isProvider
-              ? "When families reach out about your services, their inquiries will appear here."
-              : "Browse providers and request a consultation to get started."
+              ? "When families or caregivers reach out, their connections will appear here."
+              : "Browse providers and connect to get started."
           }
         />
       ) : (
         <div className="space-y-4">
-          {connections.map((connection) => (
+          {filtered.map((connection) => (
             <ConnectionCard
               key={connection.id}
               connection={connection}
+              activeProfileId={activeProfile?.id || ""}
               isProvider={!!isProvider}
               hasFullAccess={hasFullAccess}
               responding={responding === connection.id}
@@ -180,10 +235,9 @@ export default function ConnectionsPage() {
         </div>
       )}
 
-      {/* Upgrade prompt for expired trial providers */}
       {isProvider && !hasFullAccess && connections.length > 0 && (
         <div className="mt-8">
-          <UpgradePrompt context="view full inquiry details and respond to families" />
+          <UpgradePrompt context="view full details and respond to connections" />
         </div>
       )}
     </div>
@@ -192,25 +246,36 @@ export default function ConnectionsPage() {
 
 function ConnectionCard({
   connection,
+  activeProfileId,
   isProvider,
   hasFullAccess,
   responding,
   onStatusUpdate,
 }: {
   connection: ConnectionWithProfile;
+  activeProfileId: string;
   isProvider: boolean;
   hasFullAccess: boolean;
   responding: boolean;
   onStatusUpdate: (id: string, status: "accepted" | "declined" | "archived") => void;
 }) {
-  // Provider sees the family (from), Family sees the provider (to)
-  const otherProfile = isProvider
-    ? connection.fromProfile
-    : connection.toProfile;
+  // Determine which profile is "the other party"
+  const isInbound = connection.to_profile_id === activeProfileId;
+  const otherProfile = isInbound ? connection.fromProfile : connection.toProfile;
   const otherName = otherProfile?.display_name || "Unknown";
   const otherLocation = [otherProfile?.city, otherProfile?.state]
     .filter(Boolean)
     .join(", ");
+
+  // Connection type label
+  const typeLabel =
+    connection.type === "inquiry"
+      ? isInbound ? "Inquiry received" : "Inquiry sent"
+      : connection.type === "invitation"
+      ? isInbound ? "Invitation received" : "Invitation sent"
+      : connection.type === "application"
+      ? isInbound ? "Application received" : "Application sent"
+      : connection.type;
 
   const statusBadge: Record<string, { variant: "default" | "pending" | "verified" | "trial"; label: string }> = {
     pending: { variant: "pending", label: "Pending" },
@@ -225,37 +290,53 @@ function ConnectionCard({
     { month: "short", day: "numeric", year: "numeric" }
   );
 
+  // Should we blur details?
+  const shouldBlur = isProvider && !hasFullAccess && isInbound;
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3 flex-wrap mb-1">
             <h3 className="text-lg font-semibold text-gray-900">
-              {isProvider && !hasFullAccess ? blurName(otherName) : otherName}
+              {shouldBlur ? blurName(otherName) : otherName}
             </h3>
             <Badge variant={badge.variant}>{badge.label}</Badge>
+            <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
+              {typeLabel}
+            </span>
           </div>
 
           {otherLocation && (
             <p className="text-base text-gray-500 mb-2">
-              {isProvider && !hasFullAccess ? "***" : otherLocation}
+              {shouldBlur ? "***" : otherLocation}
             </p>
           )}
 
-          {/* Inquiry message */}
+          {/* Other profile's type */}
+          {otherProfile && (
+            <p className="text-sm text-gray-400 mb-2">
+              {otherProfile.type === "organization"
+                ? "Organization"
+                : otherProfile.type === "caregiver"
+                ? "Caregiver"
+                : "Family"}
+            </p>
+          )}
+
+          {/* Message / note */}
           {connection.message && (
             <div className="mt-3 bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-500 mb-1">Message:</p>
+              <p className="text-sm text-gray-500 mb-1">Note:</p>
               <p className="text-base text-gray-700">
-                {isProvider && !hasFullAccess
+                {shouldBlur
                   ? blurText(connection.message)
                   : connection.message}
               </p>
             </div>
           )}
 
-          {/* Blurred overlay for non-paying providers */}
-          {isProvider && !hasFullAccess && (
+          {shouldBlur && (
             <p className="mt-3 text-sm text-warm-600 font-medium">
               Upgrade to Pro to see full details and respond.
             </p>
@@ -265,8 +346,8 @@ function ConnectionCard({
         </div>
       </div>
 
-      {/* Action buttons for providers with access */}
-      {isProvider && hasFullAccess && connection.status === "pending" && (
+      {/* Action buttons for inbound connections with access */}
+      {isInbound && hasFullAccess && connection.status === "pending" && (
         <div className="mt-4 flex gap-3">
           <Button
             size="sm"
@@ -286,21 +367,29 @@ function ConnectionCard({
         </div>
       )}
 
-      {/* Family: show status of their inquiry */}
-      {!isProvider && connection.status === "accepted" && (
+      {/* Accepted: show contact info */}
+      {connection.status === "accepted" && otherProfile && (
         <div className="mt-4 bg-primary-50 rounded-lg p-4">
-          <p className="text-base text-primary-800 font-medium">
-            {otherName} has accepted your inquiry!
+          <p className="text-base text-primary-800 font-medium mb-1">
+            Connection accepted
           </p>
-          {otherProfile?.phone && (
-            <p className="text-base text-primary-700 mt-1">
+          {otherProfile.phone && (
+            <p className="text-base text-primary-700">
               Phone: {otherProfile.phone}
             </p>
           )}
-          {otherProfile?.email && (
-            <p className="text-base text-primary-700 mt-1">
+          {otherProfile.email && (
+            <p className="text-base text-primary-700">
               Email: {otherProfile.email}
             </p>
+          )}
+          {otherProfile.slug && (
+            <Link
+              href={`/provider/${otherProfile.slug}`}
+              className="text-sm text-primary-600 hover:underline mt-2 inline-block"
+            >
+              View full profile
+            </Link>
           )}
         </div>
       )}
@@ -308,17 +397,14 @@ function ConnectionCard({
   );
 }
 
-/** Blur a name for non-paying providers: show first letter + asterisks */
 function blurName(name: string): string {
   if (!name) return "***";
   const parts = name.split(" ");
   return parts.map((p) => p.charAt(0) + "***").join(" ");
 }
 
-/** Blur text for non-paying providers */
 function blurText(text: string): string {
   if (!text) return "";
-  // Show first 20 chars, blur the rest
   if (text.length <= 20) return "*".repeat(text.length);
   return text.substring(0, 20) + "...";
 }

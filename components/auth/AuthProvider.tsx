@@ -27,6 +27,8 @@ interface AuthContextValue extends AuthState {
   signOut: () => Promise<void>;
   /** Refresh account/profile/membership data from the database. */
   refreshAccountData: () => Promise<void>;
+  /** Switch the active profile to a different one owned by this account. */
+  switchProfile: (profileId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -48,6 +50,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     user: null,
     account: null,
     activeProfile: null,
+    profiles: [],
     membership: null,
     isLoading: true,
   });
@@ -56,10 +59,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   const configured = isSupabaseConfigured();
 
-  // Fetch account, active profile, and membership for the current user
+  // Fetch account, all profiles, active profile, and membership for the current user
   const fetchAccountData = useCallback(
     async (userId: string) => {
-      if (!configured) return { account: null, activeProfile: null, membership: null };
+      if (!configured) return { account: null, activeProfile: null, profiles: [] as Profile[], membership: null };
 
       const supabase = createClient();
 
@@ -70,17 +73,21 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         .eq("user_id", userId)
         .single<Account>();
 
-      if (!account) return { account: null, activeProfile: null, membership: null };
+      if (!account) return { account: null, activeProfile: null, profiles: [] as Profile[], membership: null };
+
+      // Get ALL profiles owned by this account
+      const { data: allProfiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("account_id", account.id)
+        .order("created_at", { ascending: true });
+
+      const profiles = (allProfiles as Profile[]) || [];
 
       // Get active profile (if set)
       let activeProfile: Profile | null = null;
       if (account.active_profile_id) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", account.active_profile_id)
-          .single<Profile>();
-        activeProfile = data;
+        activeProfile = profiles.find((p) => p.id === account.active_profile_id) || null;
       }
 
       // Get membership (if exists)
@@ -90,7 +97,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         .eq("account_id", account.id)
         .single<Membership>();
 
-      return { account, activeProfile, membership };
+      return { account, activeProfile, profiles, membership };
     },
     [configured]
   );
@@ -110,13 +117,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       } = await supabase.auth.getSession();
 
       if (session?.user) {
-        const { account, activeProfile, membership } = await fetchAccountData(
+        const { account, activeProfile, profiles, membership } = await fetchAccountData(
           session.user.id
         );
         setState({
           user: { id: session.user.id, email: session.user.email! },
           account,
           activeProfile,
+          profiles,
           membership,
           isLoading: false,
         });
@@ -132,13 +140,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
-        const { account, activeProfile, membership } = await fetchAccountData(
+        const { account, activeProfile, profiles, membership } = await fetchAccountData(
           session.user.id
         );
         setState({
           user: { id: session.user.id, email: session.user.email! },
           account,
           activeProfile,
+          profiles,
           membership,
           isLoading: false,
         });
@@ -147,6 +156,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           user: null,
           account: null,
           activeProfile: null,
+          profiles: [],
           membership: null,
           isLoading: false,
         });
@@ -182,6 +192,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       user: null,
       account: null,
       activeProfile: null,
+      profiles: [],
       membership: null,
       isLoading: false,
     });
@@ -189,11 +200,37 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshAccountData = useCallback(async () => {
     if (!state.user) return;
-    const { account, activeProfile, membership } = await fetchAccountData(
+    const { account, activeProfile, profiles, membership } = await fetchAccountData(
       state.user.id
     );
-    setState((prev) => ({ ...prev, account, activeProfile, membership }));
+    setState((prev) => ({ ...prev, account, activeProfile, profiles, membership }));
   }, [state.user, fetchAccountData]);
+
+  const switchProfile = useCallback(
+    async (profileId: string) => {
+      if (!state.user || !state.account || !configured) return;
+
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("accounts")
+        .update({ active_profile_id: profileId })
+        .eq("id", state.account.id);
+
+      if (error) {
+        console.error("Failed to switch profile:", error.message);
+        return;
+      }
+
+      // Update local state immediately then refresh for consistency
+      const newActive = state.profiles.find((p) => p.id === profileId) || null;
+      setState((prev) => ({
+        ...prev,
+        account: prev.account ? { ...prev.account, active_profile_id: profileId } : null,
+        activeProfile: newActive,
+      }));
+    },
+    [state.user, state.account, state.profiles, configured]
+  );
 
   return (
     <AuthContext.Provider
@@ -205,6 +242,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         authModalDefaultView,
         signOut,
         refreshAccountData,
+        switchProfile,
       }}
     >
       {children}

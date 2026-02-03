@@ -68,10 +68,21 @@ export default function InquiryButton({
       supabase: ReturnType<typeof createClient>,
       userAccount: NonNullable<typeof account>
     ): Promise<string> => {
-      // If they already have an active profile, use it
-      if (activeProfile) return activeProfile.id;
+      // If active profile is already a family profile, use it
+      if (activeProfile?.type === "family") return activeProfile.id;
 
-      // Create a minimal family profile
+      // Check if user already owns a family profile (even if not active)
+      const { data: existingFamily } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("account_id", userAccount.id)
+        .eq("type", "family")
+        .limit(1)
+        .single();
+
+      if (existingFamily) return existingFamily.id;
+
+      // Create a minimal family profile (don't switch active profile away from provider)
       const displayName =
         userAccount.display_name || user?.email?.split("@")[0] || "Family";
       const slug = generateSlug(displayName);
@@ -95,19 +106,19 @@ export default function InquiryButton({
 
       if (profileError) throw new Error(profileError.message);
 
-      // Set as active profile
-      const { error: updateError } = await supabase
-        .from("accounts")
-        .update({
-          active_profile_id: newProfile.id,
-          onboarding_completed: true,
-        })
-        .eq("id", userAccount.id);
+      // Only set as active if user has no active profile yet
+      if (!activeProfile) {
+        const { error: updateError } = await supabase
+          .from("accounts")
+          .update({
+            active_profile_id: newProfile.id,
+            onboarding_completed: true,
+          })
+          .eq("id", userAccount.id);
 
-      if (updateError) throw new Error(updateError.message);
-
-      // Refresh auth context so activeProfile is populated
-      await refreshAccountData();
+        if (updateError) throw new Error(updateError.message);
+        await refreshAccountData();
+      }
 
       return newProfile.id;
     },
@@ -142,7 +153,9 @@ export default function InquiryButton({
           });
 
         if (insertError) {
+          // PostgreSQL unique violation error code
           if (
+            insertError.code === "23505" ||
             insertError.message.includes("duplicate") ||
             insertError.message.includes("unique")
           ) {
@@ -257,29 +270,29 @@ export default function InquiryButton({
               </svg>
             </div>
             <p className="text-lg text-gray-900 mb-1">
-              Your inquiry has been sent!
+              Your profile has been shared!
             </p>
             <p className="text-base text-gray-600">
-              {providerName} will be notified and can respond to your inquiry.
+              {providerName} can now see your profile and respond to you.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <p className="text-base text-gray-600">
-              Send a message to {providerName} to start a conversation about
-              care options.
+              Share your profile with {providerName} to start a conversation.
+              They&#39;ll see your care needs and can reach out to you directly.
             </p>
 
             <Input
               as="textarea"
-              label="Your message (optional)"
+              label="Add a note (optional)"
               name="message"
               value={message}
               onChange={(e) =>
                 setMessage((e.target as HTMLTextAreaElement).value)
               }
-              placeholder="Tell them about your care needs, timeline, or any questions you have..."
-              rows={4}
+              placeholder="Anything specific you'd like to mention..."
+              rows={3}
             />
 
             {error && (
@@ -292,7 +305,7 @@ export default function InquiryButton({
             )}
 
             <Button type="submit" fullWidth loading={submitting}>
-              Send Inquiry
+              Share Profile
             </Button>
           </form>
         )}
