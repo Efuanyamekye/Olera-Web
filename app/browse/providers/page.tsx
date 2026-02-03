@@ -127,7 +127,7 @@ function OrgJobCard({
   const locationStr = [org.city, org.state].filter(Boolean).join(", ");
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md hover:border-primary-200 transition-shadow duration-200 cursor-pointer">
       <Link href={`/provider/${org.slug}`} target="_blank" className="block">
         {/* Image */}
         <div className="relative h-36 bg-gray-200">

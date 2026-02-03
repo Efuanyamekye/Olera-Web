@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -34,11 +35,17 @@ export default function Modal({
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Stable ref for onClose — prevents useEffect from re-running
   // when onClose identity changes between renders.
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+
+  // Track client-side mount for createPortal (SSR-safe)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on Escape key — uses ref so effect doesn't depend on onClose identity
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -83,9 +90,9 @@ export default function Modal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const modalContent = (
     <div
       ref={overlayRef}
       className="fixed inset-0 z-[60] flex items-center justify-center p-4"
@@ -132,4 +139,9 @@ export default function Modal({
       </div>
     </div>
   );
+
+  // Portal to document.body so the modal is never inside a CSS-transformed
+  // ancestor. CSS transforms create a new containing block, which causes
+  // position:fixed to behave like position:absolute relative to that ancestor.
+  return createPortal(modalContent, document.body);
 }
