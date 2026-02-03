@@ -12,6 +12,9 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isAuthenticated = !!user;
+  const isProvider =
+    activeProfile?.type === "organization" ||
+    activeProfile?.type === "caregiver";
 
   // Close user menu on outside click
   useEffect(() => {
@@ -51,12 +54,21 @@ export default function Navbar() {
             >
               Browse Care
             </Link>
-            <Link
-              href="/for-providers"
-              className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
-            >
-              For Providers
-            </Link>
+            {isProvider ? (
+              <Link
+                href="/browse/families"
+                className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
+              >
+                Browse Families
+              </Link>
+            ) : !isAuthenticated ? (
+              <Link
+                href="/for-providers"
+                className="text-gray-600 hover:text-primary-600 font-medium transition-colors focus:outline-none focus:underline"
+              >
+                For Providers
+              </Link>
+            ) : null}
           </div>
 
           {/* Desktop Auth */}
@@ -117,6 +129,22 @@ export default function Navbar() {
                     >
                       Edit Profile
                     </Link>
+                    <Link
+                      href="/portal/connections"
+                      className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      {isProvider ? "Connections" : "My Inquiries"}
+                    </Link>
+                    {isProvider && (
+                      <Link
+                        href="/portal/settings"
+                        className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Settings
+                      </Link>
+                    )}
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button
                         type="button"
@@ -201,13 +229,23 @@ export default function Navbar() {
               >
                 Browse Care
               </Link>
-              <Link
-                href="/for-providers"
-                className="text-gray-600 hover:text-primary-600 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                For Providers
-              </Link>
+              {isProvider ? (
+                <Link
+                  href="/browse/families"
+                  className="text-gray-600 hover:text-primary-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Browse Families
+                </Link>
+              ) : !isAuthenticated ? (
+                <Link
+                  href="/for-providers"
+                  className="text-gray-600 hover:text-primary-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  For Providers
+                </Link>
+              ) : null}
               <hr className="border-gray-100" />
               {isAuthenticated ? (
                 <>
@@ -225,6 +263,22 @@ export default function Navbar() {
                   >
                     Edit Profile
                   </Link>
+                  <Link
+                    href="/portal/connections"
+                    className="text-gray-600 hover:text-primary-600 font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {isProvider ? "Connections" : "My Inquiries"}
+                  </Link>
+                  {isProvider && (
+                    <Link
+                      href="/portal/settings"
+                      className="text-gray-600 hover:text-primary-600 font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
