@@ -27,17 +27,19 @@ export default function Modal({
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape key
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    },
-    [onClose]
-  );
+  // Stable ref for onClose — prevents useEffect from re-running
+  // when onClose identity changes between renders.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
-  // Keyboard listener — re-attaches when handler identity changes
+  // Close on Escape key — uses ref so effect doesn't depend on onClose identity
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      onCloseRef.current();
+    }
+  }, []);
+
+  // Keyboard listener + scroll lock — only re-runs when isOpen changes
   useEffect(() => {
     if (!isOpen) return;
 
@@ -78,7 +80,7 @@ export default function Modal({
       onClick={(e) => {
         // Close when clicking the overlay (not the content)
         if (e.target === overlayRef.current) {
-          onClose();
+          onCloseRef.current();
         }
       }}
     >
@@ -99,7 +101,7 @@ export default function Modal({
           <div className="flex items-center justify-between px-6 pt-6 pb-2">
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             <button
-              onClick={onClose}
+              onClick={() => onCloseRef.current()}
               className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               aria-label="Close"
             >

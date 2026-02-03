@@ -106,7 +106,7 @@ export default function ConnectButton({
         .eq("to_profile_id", toProfileId)
         .eq("type", connectionType)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (data) setAlreadySent(true);
     };
