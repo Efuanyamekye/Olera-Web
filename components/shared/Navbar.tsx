@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import ProfileSwitcher from "@/components/shared/ProfileSwitcher";
 import FindCareMegaMenu from "@/components/shared/FindCareMegaMenu";
 import { CARE_CATEGORIES, NAV_LINKS } from "@/components/shared/NavMenuData";
+import { useNavbar } from "@/components/shared/NavbarContext";
 
 export default function Navbar() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { visible: navbarVisible } = useNavbar();
 
   // Gate on account existence — not just user — to ensure data has loaded
   const isAuthenticated = !!user && !!account;
@@ -77,7 +79,7 @@ export default function Navbar() {
     <>
       <nav className={`sticky top-0 z-50 transition-all duration-300 bg-white ${
         isScrolled ? "shadow-sm" : ""
-      }`}>
+      } ${!navbarVisible ? "-translate-y-full" : "translate-y-0"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}

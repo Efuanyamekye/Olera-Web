@@ -106,7 +106,7 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
       href={`/provider/${provider.slug}`}
       className="group flex flex-col h-full bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-200"
     >
-      {/* Image Container - Larger for accessibility */}
+      {/* Image Container */}
       <div className="relative h-64 bg-gray-200 group/image">
         {/* Image Carousel */}
         <div className="relative w-full h-full overflow-hidden">
@@ -294,8 +294,11 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
           </p>
         </div>
 
+        {/* Spacer so the divider never sits flush against the address */}
+        <div className="flex-1 min-h-8" />
+
         {/* Stack 2: Price & Rating */}
-        <div className="mt-auto pt-4 border-t border-gray-100">
+        <div className="pt-4 border-t border-gray-100">
           <div className="flex items-center justify-between">
             {/* Price with "From" prefix */}
             <p className="text-text-lg">

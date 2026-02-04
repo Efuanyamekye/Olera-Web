@@ -5,9 +5,10 @@ import { useState } from "react";
 interface ImageGalleryProps {
   images: string[];
   alt: string;
+  onClose?: () => void;
 }
 
-export default function ImageGallery({ images, alt }: ImageGalleryProps) {
+export default function ImageGallery({ images, alt, onClose }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goToPrevious = () => {
@@ -84,6 +85,19 @@ export default function ImageGallery({ images, alt }: ImageGalleryProps) {
         <div className="absolute top-4 right-4 bg-black/50 text-white text-xs font-medium px-2.5 py-1 rounded-full z-20">
           {currentIndex + 1} / {images.length}
         </div>
+      )}
+
+      {/* Close button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 left-4 w-9 h-9 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors z-20"
+          aria-label="Close gallery"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       )}
     </div>
   );

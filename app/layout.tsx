@@ -4,6 +4,7 @@ import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import AuthProvider from "@/components/auth/AuthProvider";
 import AuthModal from "@/components/auth/AuthModal";
+import { NavbarProvider } from "@/components/shared/NavbarContext";
 
 export const metadata: Metadata = {
   title: "Olera | Find Senior Care Near You",
@@ -28,10 +29,12 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-50 min-h-screen flex flex-col font-sans">
         <AuthProvider>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <AuthModal />
+          <NavbarProvider>
+            <Navbar />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+            <AuthModal />
+          </NavbarProvider>
         </AuthProvider>
       </body>
     </html>

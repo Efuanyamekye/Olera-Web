@@ -436,6 +436,47 @@ export const providersByCategory: Record<string, Provider[]> = {
 };
 
 // ============================================================
+// Browse page exports
+// ============================================================
+
+/** Flat array of all providers for browse/search results */
+export const allBrowseProviders: Provider[] = [
+  ...topProviders,
+  ...Object.values(providersByCategory).flat(),
+];
+
+/** Map care type slug to display label */
+const careTypeLabelMap: Record<string, string> = {
+  "home-care": "Home Care",
+  "home-health": "Home Health",
+  "assisted-living": "Assisted Living",
+  "memory-care": "Memory Care",
+  "nursing-homes": "Nursing Homes",
+  "nursing-home": "Nursing Homes",
+  "independent-living": "Independent Living",
+  "hospice": "Hospice",
+};
+
+export function getCareTypeLabel(slug: string): string {
+  return careTypeLabelMap[slug] || "Senior Care";
+}
+
+/** Map care type slug to the primaryCategory value used on Provider objects */
+export function getCareTypeName(slug: string): string {
+  const nameMap: Record<string, string> = {
+    "home-care": "Home Care",
+    "home-health": "Home Health",
+    "assisted-living": "Assisted Living",
+    "memory-care": "Memory Care",
+    "nursing-homes": "Nursing Home",
+    "nursing-home": "Nursing Home",
+    "independent-living": "Independent Living",
+    "hospice": "Hospice",
+  };
+  return nameMap[slug] || "";
+}
+
+// ============================================================
 // Helpers
 // ============================================================
 
