@@ -84,7 +84,7 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   return (
     <Link
       href={`/provider/${provider.slug}`}
-      className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300"
+      className="group flex flex-col h-full bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-200"
     >
       {/* Image Container - Larger for accessibility */}
       <div className="relative h-64 bg-gray-200 group/image">
@@ -239,37 +239,17 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
             </div>
           </div>
         )}
-        {/* Favorite Button */}
-        <button
-          className="absolute top-3 right-3 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors focus-ring"
-          aria-label={`Save ${provider.name}`}
-        >
-          <svg
-            className="w-5 h-5 text-gray-400 hover:text-primary-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        </button>
       </div>
 
-      {/* Content - 256px to match image height */}
-      <div className="pt-5 px-5 pb-5 flex flex-col h-64">
+      {/* Content */}
+      <div className="p-5 flex flex-col flex-1">
         {/* Stack 1: Category, Provider Name & Location */}
         <div>
-          <p className="text-primary-600 text-sm font-semibold tracking-wide uppercase">
+          <p className="text-primary-600 text-text-sm font-semibold">
             {provider.primaryCategory}
           </p>
           <div className="flex items-center gap-2 mt-1">
-            <h3 className="font-bold text-gray-900 text-xl leading-tight">
+            <h3 className="font-semibold text-gray-900 text-text-lg">
               {provider.name}
             </h3>
             {/* Verified Badge */}
@@ -289,48 +269,55 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
               </div>
             )}
           </div>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <p className="text-gray-500 text-text-sm mt-1">
             {provider.address}
           </p>
         </div>
 
         {/* Stack 2: Price & Rating */}
-        <div className="flex items-center justify-between mt-4">
-          {/* Price with "From" prefix */}
-          <p className="text-lg">
-            <span className="text-gray-500 font-normal">From </span>
-            <span className="text-gray-900 font-semibold">{provider.priceRange}</span>
-          </p>
+        <div className="mt-auto pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            {/* Price with "From" prefix */}
+            <p className="text-text-lg">
+              <span className="text-gray-500 text-text-sm">From </span>
+              <span className="text-gray-900 font-semibold">{provider.priceRange}</span>
+            </p>
 
-          {/* Rating with review count */}
-          <div className="flex items-center gap-1.5 text-gray-900">
-            <svg
-              className="w-6 h-6 text-primary-500"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span className="font-semibold text-lg">{provider.rating.toFixed(1)}</span>
-            {provider.reviewCount && (
-              <span className="text-gray-500 text-base">({provider.reviewCount})</span>
-            )}
+            {/* Rating with review count */}
+            <div className="flex items-center gap-1.5">
+              <svg
+                className="w-5 h-5 text-warning-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span className="font-semibold text-text-md text-gray-900">{provider.rating.toFixed(1)}</span>
+              {provider.reviewCount && (
+                <span className="text-gray-500 text-text-sm">({provider.reviewCount})</span>
+              )}
+            </div>
           </div>
+
+          {/* Accepted Payment Types */}
+          {provider.acceptedPayments && provider.acceptedPayments.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {provider.acceptedPayments.slice(0, 3).map((payment) => (
+                <span
+                  key={payment}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-text-xs font-medium bg-gray-100 text-gray-600"
+                >
+                  {payment}
+                </span>
+              ))}
+              {provider.acceptedPayments.length > 3 && (
+                <span className="text-text-xs text-gray-400">
+                  +{provider.acceptedPayments.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
         </div>
-
-        {/* Address */}
-        <p className="text-gray-500 text-base mt-1">{provider.address}</p>
-
-        {/* Price */}
-        <div className="mt-3">
-          <p className="text-gray-500 text-sm">Estimated Pricing</p>
-          <p className="text-gray-900 font-semibold">{provider.priceRange}</p>
-        </div>
-
-        {/* CTA Button */}
-        <span className="mt-4 w-full btn-primary text-base block text-center">
-          View provider
-        </span>
       </div>
     </Link>
   );
