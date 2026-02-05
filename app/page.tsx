@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useCitySearch } from "@/hooks/use-city-search";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import ProviderCard from "@/components/providers/ProviderCard";
 import { topProviders, providersByCategory } from "@/lib/mock-providers";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import {
+  type Provider as IOSProvider,
+  type ProviderCardData,
+  PROVIDERS_TABLE,
+  toCardFormat,
+  mockToCardFormat,
+} from "@/lib/types/provider";
 
 // Hook to detect when element is in view
 function useInView(threshold: number = 0.3) {
@@ -122,32 +131,7 @@ const careTypeOptions = [
   { value: "independent-living", label: "Independent Living" },
 ];
 
-// Location suggestions for autocomplete
-const locationSuggestions = [
-  { city: "Dallas", state: "TX", full: "Dallas, TX" },
-  { city: "Plano", state: "TX", full: "Plano, TX" },
-  { city: "Frisco", state: "TX", full: "Frisco, TX" },
-  { city: "Irving", state: "TX", full: "Irving, TX" },
-  { city: "Richardson", state: "TX", full: "Richardson, TX" },
-  { city: "Garland", state: "TX", full: "Garland, TX" },
-  { city: "McKinney", state: "TX", full: "McKinney, TX" },
-  { city: "Carrollton", state: "TX", full: "Carrollton, TX" },
-  { city: "Arlington", state: "TX", full: "Arlington, TX" },
-  { city: "Fort Worth", state: "TX", full: "Fort Worth, TX" },
-  { city: "Austin", state: "TX", full: "Austin, TX" },
-  { city: "Houston", state: "TX", full: "Houston, TX" },
-  { city: "San Antonio", state: "TX", full: "San Antonio, TX" },
-  { city: "New York", state: "NY", full: "New York, NY" },
-  { city: "Los Angeles", state: "CA", full: "Los Angeles, CA" },
-  { city: "Chicago", state: "IL", full: "Chicago, IL" },
-  { city: "Phoenix", state: "AZ", full: "Phoenix, AZ" },
-  { city: "Philadelphia", state: "PA", full: "Philadelphia, PA" },
-  { city: "Denver", state: "CO", full: "Denver, CO" },
-  { city: "Seattle", state: "WA", full: "Seattle, WA" },
-  { city: "Miami", state: "FL", full: "Miami, FL" },
-  { city: "Atlanta", state: "GA", full: "Atlanta, GA" },
-  { city: "Boston", state: "MA", full: "Boston, MA" },
-];
+// Location suggestions moved to useCitySearch hook for comprehensive US city search
 
 // Scrolling tags data
 const scrollingTags = {
@@ -574,11 +558,23 @@ function BentoGridSection() {
   );
 }
 
+// Map UI category IDs to iOS Supabase provider_category values
+const categoryToProviderCategory: Record<string, string> = {
+  "home-care": "Home Care (Non-medical)",
+  "home-health": "Home Health Care",
+  "assisted-living": "Assisted Living",
+  "memory-care": "Memory Care",
+  "independent-living": "Independent Living",
+  "nursing-home": "Nursing Home",
+};
+
 // Browse by Care Type Section Component
 function BrowseByCareTypeSection() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>("home-care");
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [categoryProviders, setCategoryProviders] = useState<ProviderCardData[]>([]);
+  const [isLoadingCategory, setIsLoadingCategory] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const updateScrollState = useCallback(() => {
@@ -633,7 +629,56 @@ function BrowseByCareTypeSection() {
     }
   };
 
-  const selectedProviders = selectedCategory ? providersByCategory[selectedCategory] || [] : [];
+  // Fetch providers for selected category from iOS Supabase
+  useEffect(() => {
+    async function fetchCategoryProviders() {
+      if (!selectedCategory) {
+        setCategoryProviders([]);
+        setIsLoadingCategory(false);
+        return;
+      }
+
+      setIsLoadingCategory(true);
+      const providerCategory = categoryToProviderCategory[selectedCategory];
+
+      if (!isSupabaseConfigured() || !providerCategory) {
+        // Fall back to mock data
+        const mockProviders = providersByCategory[selectedCategory] || [];
+        setCategoryProviders(mockProviders.map(mockToCardFormat));
+        setIsLoadingCategory(false);
+        return;
+      }
+
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from(PROVIDERS_TABLE)
+          .select("*")
+          .eq("deleted", false)
+          .ilike("provider_category", `%${providerCategory}%`)
+          .not("provider_images", "is", null)
+          .order("google_rating", { ascending: false, nullsFirst: false })
+          .limit(8);
+
+        if (error || !data || data.length === 0) {
+          // Fall back to mock data
+          const mockProviders = providersByCategory[selectedCategory] || [];
+          setCategoryProviders(mockProviders.map(mockToCardFormat));
+        } else {
+          setCategoryProviders((data as IOSProvider[]).map(toCardFormat));
+        }
+      } catch (err) {
+        console.error("Error fetching category providers:", err);
+        // Fall back to mock data
+        const mockProviders = providersByCategory[selectedCategory] || [];
+        setCategoryProviders(mockProviders.map(mockToCardFormat));
+      } finally {
+        setIsLoadingCategory(false);
+      }
+    }
+
+    fetchCategoryProviders();
+  }, [selectedCategory]);
 
   return (
     <section className="pt-8 md:pt-12 pb-6 md:pb-10">
@@ -725,11 +770,18 @@ function BrowseByCareTypeSection() {
                 ref={scrollContainerRef}
                 className="flex gap-5 overflow-x-scroll pb-4 scrollbar-hide"
               >
-                {selectedProviders.slice(0, 6).map((provider) => (
-                  <div key={provider.id} className="flex-shrink-0 w-[370px] h-[512px]">
-                    <ProviderCard provider={provider} />
-                  </div>
-                ))}
+                {isLoadingCategory ? (
+                  // Loading skeleton
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex-shrink-0 w-[370px] h-[512px] bg-gray-100 rounded-2xl animate-pulse" />
+                  ))
+                ) : (
+                  categoryProviders.slice(0, 6).map((provider) => (
+                    <div key={provider.id} className="flex-shrink-0 w-[370px] h-[512px]">
+                      <ProviderCard provider={provider} />
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -767,13 +819,15 @@ const stateAbbreviations: Record<string, string> = {
 };
 
 export default function HomePage() {
-  const [location, setLocation] = useState("Houston, TX");
+  const [location, setLocation] = useState("");
   const [careType, setCareType] = useState("home-health");
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showCareTypeDropdown, setShowCareTypeDropdown] = useState(false);
   const [isGeolocating, setIsGeolocating] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [featuredProviders, setFeaturedProviders] = useState<ProviderCardData[]>([]);
+  const [isLoadingProviders, setIsLoadingProviders] = useState(true);
   const router = useRouter();
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
@@ -821,19 +875,8 @@ export default function HomePage() {
     );
   };
 
-  // Filter location suggestions based on input
-  const filteredLocations = React.useMemo(() => {
-    if (!location.trim()) return locationSuggestions.slice(0, 8);
-    const search = location.toLowerCase();
-    return locationSuggestions
-      .filter(
-        (loc) =>
-          loc.city.toLowerCase().includes(search) ||
-          loc.state.toLowerCase().includes(search) ||
-          loc.full.toLowerCase().includes(search)
-      )
-      .slice(0, 8);
-  }, [location]);
+  // City search with progressive loading (18K+ US cities, ZIP codes, states)
+  const { results: cityResults, preload: preloadCities } = useCitySearch(location);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -853,6 +896,47 @@ export default function HomePage() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch featured providers from iOS Supabase
+  useEffect(() => {
+    async function fetchFeaturedProviders() {
+      if (!isSupabaseConfigured()) {
+        // Fall back to mock data if Supabase not configured
+        setFeaturedProviders(topProviders.map(mockToCardFormat));
+        setIsLoadingProviders(false);
+        return;
+      }
+
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from(PROVIDERS_TABLE)
+          .select("*")
+          .eq("deleted", false)
+          .not("google_rating", "is", null)
+          .gte("google_rating", 4.0)
+          .not("provider_images", "is", null)
+          .order("google_rating", { ascending: false })
+          .limit(8);
+
+        if (error || !data || data.length === 0) {
+          // Fall back to mock data
+          setFeaturedProviders(topProviders.map(mockToCardFormat));
+        } else {
+          // Convert iOS providers to card format
+          setFeaturedProviders((data as IOSProvider[]).map(toCardFormat));
+        }
+      } catch (err) {
+        console.error("Error fetching providers:", err);
+        // Fall back to mock data
+        setFeaturedProviders(topProviders.map(mockToCardFormat));
+      } finally {
+        setIsLoadingProviders(false);
+      }
+    }
+
+    fetchFeaturedProviders();
   }, []);
 
   const updateScrollState = useCallback(() => {
@@ -983,7 +1067,10 @@ export default function HomePage() {
                             setLocation(e.target.value);
                             setShowLocationDropdown(true);
                           }}
-                          onFocus={() => setShowLocationDropdown(true)}
+                          onFocus={() => {
+                            setShowLocationDropdown(true);
+                            preloadCities(); // Preload full city data on focus
+                          }}
                           placeholder="City or ZIP code"
                           className="w-full ml-3 bg-transparent border-none text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-base"
                         />
@@ -991,36 +1078,48 @@ export default function HomePage() {
 
                       {/* Location Dropdown */}
                       {showLocationDropdown && (
-                        <div className="absolute left-0 top-[calc(100%+8px)] w-full bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 max-h-[300px] overflow-y-auto">
-                          {/* Use Current Location Button */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              detectLocation();
-                              setShowLocationDropdown(false);
-                            }}
-                            disabled={isGeolocating}
-                            className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-primary-600 hover:bg-primary-50 transition-colors"
-                          >
-                            {isGeolocating ? (
-                              <svg className="w-4 h-4 text-primary-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                              </svg>
-                            )}
-                            <span className="font-medium">
-                              {isGeolocating ? "Detecting..." : "Use my current location"}
-                            </span>
-                          </button>
+                        <div className="absolute left-0 top-[calc(100%+8px)] w-full bg-white rounded-xl shadow-xl border border-gray-200 py-3 z-50 max-h-[340px] overflow-y-auto">
+                          {/* Use Current Location - Prominent Button */}
+                          <div className="px-3 pb-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                detectLocation();
+                                setShowLocationDropdown(false);
+                              }}
+                              disabled={isGeolocating}
+                              className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary-50 hover:bg-primary-100 border border-primary-200 rounded-lg text-primary-700 font-medium transition-colors disabled:opacity-60"
+                            >
+                              {isGeolocating ? (
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+                                </svg>
+                              )}
+                              <span>{isGeolocating ? "Detecting location..." : "Use my current location"}</span>
+                            </button>
+                          </div>
 
-                          <div className="border-t border-gray-100 my-1" />
+                          {/* Divider with "or" */}
+                          <div className="flex items-center gap-3 px-4 py-1">
+                            <div className="flex-1 h-px bg-gray-200" />
+                            <span className="text-xs text-gray-400 font-medium">or search</span>
+                            <div className="flex-1 h-px bg-gray-200" />
+                          </div>
 
-                          {filteredLocations.length > 0 ? (
-                            filteredLocations.map((loc) => (
+                          {/* Popular Cities Label */}
+                          {!location.trim() && cityResults.length > 0 && (
+                            <div className="px-4 pt-2 pb-1">
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Popular cities</span>
+                            </div>
+                          )}
+
+                          {cityResults.length > 0 ? (
+                            cityResults.map((loc) => (
                               <button
                                 key={loc.full}
                                 type="button"
@@ -1185,11 +1284,18 @@ export default function HomePage() {
               ref={scrollContainerRef}
               className="flex gap-5 overflow-x-scroll pb-4 scrollbar-hide"
             >
-              {topProviders.map((provider) => (
-                <div key={provider.id} className="flex-shrink-0 w-[370px] h-[512px]">
-                  <ProviderCard provider={provider} />
-                </div>
-              ))}
+              {isLoadingProviders ? (
+                // Loading skeleton
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 w-[370px] h-[512px] bg-gray-100 rounded-2xl animate-pulse" />
+                ))
+              ) : (
+                featuredProviders.map((provider) => (
+                  <div key={provider.id} className="flex-shrink-0 w-[370px] h-[512px]">
+                    <ProviderCard provider={provider} />
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

@@ -8,7 +8,14 @@
 
 _What's the main thing being worked on right now?_
 
-- Landing page redesign (hero section, provider cards spacing)
+- **Supabase Unification**: Connect web provider pages to iOS Supabase (P1 task)
+  - Plan: `plans/supabase-unification-plan.md`
+  - **Phase 1: COMPLETE** - All pages connected to iOS Supabase
+  - ✅ Provider detail page shows real data + similar providers
+  - ✅ Homepage fetches real providers (top + by category)
+  - ✅ Browse page with search/filtering by state/category
+  - ✅ All PRs merged (#16, #17, #18)
+  - Phase 2/3: Waiting for iOS app approval before schema changes
 
 ---
 
@@ -21,7 +28,8 @@ _Active work items and their current state._
 - [x] Provider detail page
 - [x] Hero section redesign
 - [x] Provider card spacing standardization
-- [ ] Browse page with filtering
+- [x] Browse page with filtering
+- [x] iOS Supabase integration (Phase 1)
 
 ---
 
@@ -37,9 +45,10 @@ _None currently._
 
 _What should be tackled next, in priority order._
 
-1. Browse page with provider cards and filters
-2. User authentication (login/signup)
-3. Consultation request flow
+1. User authentication (login/signup)
+2. Consultation request flow
+3. Phase 2: Environment strategy (dev/staging/prod)
+4. Phase 3: Supabase unification (after iOS approval)
 
 ---
 
@@ -49,6 +58,8 @@ _Key decisions with rationale, for future reference._
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
+| 2026-02-05 | No adapter layer for iOS schema | User feedback: keep both uniform, simpler code |
+| 2026-02-05 | Server-side browse page over client-side | Real Supabase data requires server components |
 | 2026-01-30 | Added Claude Code slash commands | Standardize workflow for explore → plan → build → save cycle |
 
 ---
@@ -63,6 +74,70 @@ _Useful context, patterns noticed, things to remember._
 ---
 
 ## Session Log
+
+### 2026-02-05
+
+**Supabase Unification - Phase 1 Implementation:**
+
+*Session 2:*
+- Connected web app to iOS Supabase (`ocaabzfiiikjcgqwhbwr`)
+- Created `lib/types/provider.ts` - iOS Provider schema + helpers
+- Key decision: **No adapter layer** - adjusted web to match iOS schema directly
+  - User feedback: "why adapter layer, what if we made both uniform"
+  - Result: Simpler code, direct schema match
+- Updated `app/provider/[slug]/page.tsx`:
+  - Queries `olera-providers` table (39,355+ providers)
+  - Uses `provider_id` as URL slug
+  - Falls back to mock data for dev/demo
+- Updated `app/page.tsx`:
+  - "Top providers" fetches from Supabase (rating >= 4.0)
+  - "Browse by care type" fetches by `provider_category`
+  - Added loading skeletons and mock fallback
+- Created helper functions:
+  - `toCardFormat()` - iOS Provider → ProviderCard data
+  - `mockToCardFormat()` - Mock data → ProviderCard data
+  - `parseProviderImages()` - Pipe-separated string → array
+  - `formatPriceRange()`, `formatLocation()`, `getCategoryDisplayName()`
+
+*Session 3:*
+- Updated browse page (`/browse`) to use iOS Supabase
+  - Search by name, city, or zipcode
+  - Filter by care type (maps to `provider_category`)
+  - Filter by state
+  - Shows 50 providers, ordered by rating
+- Added similar providers to detail page (`/provider/[slug]`)
+  - Queries providers with same category
+  - Shows up to 4 similar providers with thumbnails
+  - Links to browse page for full category view
+- **Phase 1 Complete** - All web pages connected to iOS Supabase
+
+**Phase 1 Summary:**
+- Provider detail, homepage, browse page all fetch from iOS Supabase
+- 39,355+ real providers accessible
+- Graceful mock fallback for development
+- No schema changes made (iOS app safe during review)
+
+*Session 4:*
+- Resolved merge conflicts in PR #16 (browse-page-refinement)
+  - Conflicts: `app/browse/page.tsx`, `app/provider/[slug]/page.tsx`
+  - Resolution: Keep iOS Supabase integration + SEO metadata from PR
+  - Created `components/browse/BrowseFilters.tsx` for server-side filtering
+- Created PR #17 with resolved conflicts (PR #16 was from fork)
+- Merged all PRs:
+  - PR #16: Browse page refinement (auto-closed)
+  - PR #17: Browse page refinement with iOS Supabase integration
+  - PR #18: Landing page search and browse layout refinements
+- All pages now deployed with real Supabase data
+
+*Session 1:*
+- Ran `/explore` workflow - identified TJ's P1 task from Notion
+- Explored codebase structure
+- Created implementation plan: `plans/supabase-unification-plan.md`
+- Constraint: iOS app in Apple review, cannot be broken
+
+**Key Finding:**
+- `DATABASE_STRATEGY.md` recommends Neon + Clerk, but Notion task specifies Supabase unification
+- Decision: Follow Notion task, keep DATABASE_STRATEGY.md as future reference
 
 ### 2026-02-03
 
