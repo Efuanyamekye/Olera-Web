@@ -122,6 +122,67 @@ export function buildQuickFacts(input: QuickFactsInput): QuickFact[] {
 }
 
 // ============================================================
+// Default Q&A (category-aware)
+// ============================================================
+
+export interface QAItem {
+  question: string;
+  answer: string;
+}
+
+export function getDefaultQA(
+  category: ProfileCategory | null,
+  providerName: string
+): QAItem[] {
+  const faqs: QAItem[] = [
+    {
+      question: `What should I expect during my first visit to ${providerName}?`,
+      answer:
+        "We encourage families to schedule a tour to see our community firsthand. During your visit, you'll meet our care team, see available living spaces, and learn about our daily programs and activities.",
+    },
+    {
+      question: "What is included in the monthly cost?",
+      answer:
+        "Our base fee typically covers housing, meals, housekeeping, and basic care services. Additional services such as medication management or specialized care programs may have additional fees. Contact us for a detailed breakdown.",
+    },
+    {
+      question: "How do you handle medical emergencies?",
+      answer:
+        "Our staff is trained in emergency response protocols. We maintain 24/7 on-call medical support and have established relationships with local hospitals and emergency services for immediate care when needed.",
+    },
+  ];
+
+  // Add category-specific questions
+  if (category === "memory_care") {
+    faqs.push({
+      question: "What specialized memory care programs do you offer?",
+      answer:
+        "We offer evidence-based memory care programs including cognitive stimulation therapy, reminiscence activities, and structured daily routines designed to support individuals living with Alzheimer's and other forms of dementia.",
+    });
+  } else if (category === "home_care_agency" || category === "home_health_agency") {
+    faqs.push({
+      question: "How are your caregivers screened and trained?",
+      answer:
+        "All caregivers undergo thorough background checks, reference verification, and skills assessments. They receive ongoing training in areas including fall prevention, medication management, and dementia care techniques.",
+    });
+  } else if (category === "hospice_agency" || category === "inpatient_hospice") {
+    faqs.push({
+      question: "What support do you provide for family members?",
+      answer:
+        "We offer comprehensive family support including counseling, bereavement services, respite care, and educational resources. Our social workers and chaplains are available to help families navigate this journey.",
+    });
+  } else if (category === "independent_living") {
+    faqs.push({
+      question: "Can residents personalize their living spaces?",
+      answer:
+        "Yes, we encourage residents to bring personal belongings, furniture, and decorations to make their space feel like home. Our team can help with the transition and setup.",
+    });
+  }
+
+  return faqs;
+}
+
+// ============================================================
 // Similar providers
 // ============================================================
 

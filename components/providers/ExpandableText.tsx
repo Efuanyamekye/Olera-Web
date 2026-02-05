@@ -21,15 +21,20 @@ export default function ExpandableText({
 
   return (
     <div className={className}>
-      <p className="text-gray-600 text-[15px] leading-relaxed">{displayText}</p>
-      {needsTruncation && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"
-        >
-          {expanded ? "Show less" : "Read more"}
-        </button>
-      )}
+      <p className="text-gray-600 text-text-lg leading-relaxed">
+        {displayText}
+        {needsTruncation && (
+          <>
+            {" "}
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="text-primary-600 hover:text-primary-700 font-medium text-text-lg transition-colors"
+            >
+              {expanded ? "Show less" : "Read more"}
+            </button>
+          </>
+        )}
+      </p>
     </div>
   );
 }

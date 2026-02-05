@@ -26,10 +26,19 @@ export const topProviders: Provider[] = [
     ],
     address: "1234 Oak Street, Austin, TX 78701",
     rating: 4.8,
-    reviewCount: 47,
+    reviewCount: 3,
     priceRange: "$3,500/mo",
     primaryCategory: "Assisted Living",
-    careTypes: ["Memory Care", "Respite Care"],
+    careTypes: [
+      "Memory Care", "Respite Care", "Vitals check", "Personal care assistants",
+      "Walking wheelchair assistance", "In home care", "Social activities",
+      "Exercise help", "Transportation", "Health and wellness programs",
+      "Bathing assistance", "Medication reminders", "Dental care",
+      "Bathroom assistance", "Dressing assistance", "Laundry assistance",
+      "Wellness checks", "24-hr care", "Fall prevention", "Meal service",
+      "Escort to appointments", "Errands", "Shopping", "Toileting assistance",
+      "Incontinence care", "Assistance with mobility", "Light housekeeping",
+    ],
     highlights: ["24/7 Nursing Staff", "Pet Friendly", "Private Rooms"],
     acceptedPayments: ["Medicare", "Medicaid", "Private Pay"],
     verified: true,
@@ -43,6 +52,35 @@ export const topProviders: Provider[] = [
       bio: "Board-certified geriatrician with 15+ years experience in senior care. Passionate about creating personalized care plans that prioritize dignity and quality of life.",
       image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200",
     },
+    pricingDetails: [
+      { service: "Assisted Living", rate: "$3,500", rateType: "per month" },
+      { service: "Memory Care", rate: "$4,800", rateType: "per month" },
+      { service: "Respite Care", rate: "$250", rateType: "per day" },
+    ],
+    staffScreening: { background_checked: true, licensed: true, insured: true },
+    reviews: [
+      {
+        name: "Margaret T.",
+        rating: 5,
+        date: "January 2025",
+        comment: "The staff at Sunrise have been wonderful with my mother. They truly treat every resident like family. The memory care program is exceptional and we've seen real improvements in her daily engagement.",
+        relationship: "Daughter of Resident",
+      },
+      {
+        name: "Robert K.",
+        rating: 5,
+        date: "December 2024",
+        comment: "We toured several facilities before choosing Sunrise. The cleanliness, attentive staff, and range of activities really set them apart. My father has been happy here for over a year now.",
+        relationship: "Son of Resident",
+      },
+      {
+        name: "Linda W.",
+        rating: 4,
+        date: "November 2024",
+        comment: "Overall a great experience. The care team communicates well and my mom enjoys the social activities. Pricing is on the higher side but the quality of care justifies it.",
+        relationship: "Daughter of Resident",
+      },
+    ],
   },
   {
     id: "2",
@@ -56,15 +94,28 @@ export const topProviders: Provider[] = [
     ],
     address: "5678 Maple Avenue, Austin, TX 78702",
     rating: 4.6,
-    reviewCount: 21,
+    reviewCount: 0,
     priceRange: "$4,200/mo",
     primaryCategory: "Memory Care",
-    careTypes: ["Hospice", "Skilled Nursing"],
+    careTypes: [
+      "Hospice", "Skilled Nursing", "Vitals check", "Medication reminders",
+      "24-hr care", "Wellness checks", "Health and wellness programs",
+      "Personal care assistants", "Bathing assistance", "Dressing assistance",
+      "Meal service", "Fall prevention", "Incontinence care",
+      "Assistance with mobility", "Bathroom assistance", "Toileting assistance",
+      "Social activities", "Light housekeeping",
+    ],
     highlights: ["Dementia Specialists", "Secured Facility", "Family Support"],
     acceptedPayments: ["Medicaid", "Long-term Insurance"],
     verified: true,
     description:
       "Specialized memory care community with 24/7 nursing support. Our evidence-based approach combines clinical excellence with compassionate care, providing a secure and stimulating environment for individuals with Alzheimer's and dementia.",
+    pricingDetails: [
+      { service: "Memory Care", rate: "$4,200", rateType: "per month" },
+      { service: "Hospice Care", rate: "$5,100", rateType: "per month" },
+      { service: "Skilled Nursing", rate: "$6,000", rateType: "per month" },
+    ],
+    staffScreening: { background_checked: true, licensed: true, insured: true },
   },
   {
     id: "3",
@@ -80,10 +131,15 @@ export const topProviders: Provider[] = [
     ],
     address: "910 Pine Road, Austin, TX 78703",
     rating: 4.5,
-    reviewCount: 12,
+    reviewCount: 2,
     priceRange: "$2,800/mo",
     primaryCategory: "Independent Living",
-    careTypes: ["Assisted Living"],
+    careTypes: [
+      "Assisted Living", "Social activities", "Exercise help",
+      "Transportation", "Health and wellness programs", "Meal service",
+      "Escort to appointments", "Errands", "Shopping", "Light housekeeping",
+      "Wellness checks", "Fall prevention", "Assistance with mobility",
+    ],
     highlights: ["Active Lifestyle", "On-site Fitness", "Social Events"],
     acceptedPayments: ["Private Pay", "Veterans Benefits"],
     verified: true,
@@ -97,6 +153,27 @@ export const topProviders: Provider[] = [
       bio: "Certified recreation therapist dedicated to keeping seniors active and engaged. Organizes daily fitness classes, social events, and community outings.",
       image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200",
     },
+    pricingDetails: [
+      { service: "Independent Living", rate: "$2,800", rateType: "per month" },
+      { service: "Assisted Living", rate: "$3,900", rateType: "per month" },
+    ],
+    staffScreening: { background_checked: true, licensed: true, insured: true },
+    reviews: [
+      {
+        name: "James P.",
+        rating: 5,
+        date: "January 2025",
+        comment: "My parents love it here. The community is vibrant and there's always something to do. The fitness center is excellent and the staff genuinely cares about everyone's well-being.",
+        relationship: "Son of Resident",
+      },
+      {
+        name: "Dorothy H.",
+        rating: 4,
+        date: "October 2024",
+        comment: "A lovely place to live. I enjoy the social events and the dining options are varied. Wish there were more weekend activities but overall very happy with my decision to move here.",
+        relationship: "Resident",
+      },
+    ],
   },
   {
     id: "4",
@@ -109,15 +186,73 @@ export const topProviders: Provider[] = [
     ],
     address: "Serving Greater Austin Area",
     rating: 4.9,
-    reviewCount: 83,
+    reviewCount: 6,
     priceRange: "$25/hr",
     primaryCategory: "Home Care",
-    careTypes: ["Respite Care", "Companion Care"],
+    careTypes: [
+      "Respite Care", "Companion Care", "Personal care assistants",
+      "In home care", "Bathing assistance", "Medication reminders",
+      "Dressing assistance", "Laundry assistance", "Meal service",
+      "Light housekeeping", "Errands", "Shopping", "Transportation",
+      "Escort to appointments", "Exercise help", "Wellness checks",
+      "Toileting assistance", "Incontinence care", "Assistance with mobility",
+      "Fall prevention", "Walking wheelchair assistance",
+    ],
     highlights: ["Flexible Scheduling", "Background Checked", "Bilingual Staff"],
     acceptedPayments: ["Medicare", "Private Pay"],
     verified: true,
     description:
       "Compassionate in-home care tailored to your loved one's needs. Our carefully screened and trained caregivers provide personal care, meal preparation, medication reminders, and companionship in the comfort of home.",
+    pricingDetails: [
+      { service: "Personal Care", rate: "$25", rateType: "per hour" },
+      { service: "Companion Care", rate: "$22", rateType: "per hour" },
+      { service: "Respite Care", rate: "$28", rateType: "per hour" },
+    ],
+    staffScreening: { background_checked: true, licensed: false, insured: true },
+    reviews: [
+      {
+        name: "Susan M.",
+        rating: 5,
+        date: "January 2025",
+        comment: "Caring Hearts has been a lifesaver for our family. The caregiver assigned to my father is incredibly patient and kind. She treats him like her own family member. Highly recommend their services.",
+        relationship: "Daughter of Client",
+      },
+      {
+        name: "David R.",
+        rating: 5,
+        date: "December 2024",
+        comment: "Excellent home care service. The scheduling is flexible and the caregivers are always on time. My mother feels comfortable and safe with her caregiver, which gives us tremendous peace of mind.",
+        relationship: "Son of Client",
+      },
+      {
+        name: "Patricia L.",
+        rating: 5,
+        date: "November 2024",
+        comment: "We've been using Caring Hearts for six months now and couldn't be happier. They matched us with a bilingual caregiver which was exactly what we needed for my grandmother.",
+        relationship: "Granddaughter of Client",
+      },
+      {
+        name: "Thomas B.",
+        rating: 4,
+        date: "October 2024",
+        comment: "Good service overall. There was one scheduling mix-up early on but they resolved it quickly and it hasn't happened since. The caregiver is wonderful with my wife.",
+        relationship: "Spouse of Client",
+      },
+      {
+        name: "Maria G.",
+        rating: 5,
+        date: "September 2024",
+        comment: "The best home care agency we've worked with. Professional, compassionate, and reliable. They go above and beyond to make sure my father is comfortable and well cared for at home.",
+        relationship: "Daughter of Client",
+      },
+      {
+        name: "Karen S.",
+        rating: 5,
+        date: "August 2024",
+        comment: "I cannot say enough good things about this team. From the initial consultation to the daily care, everything has been handled with professionalism and genuine warmth.",
+        relationship: "Daughter of Client",
+      },
+    ],
   },
   {
     id: "5",
@@ -130,16 +265,35 @@ export const topProviders: Provider[] = [
     ],
     address: "2345 Elm Street, Austin, TX 78704",
     rating: 4.7,
-    reviewCount: 38,
+    reviewCount: 1,
     priceRange: "$3,200/mo",
     primaryCategory: "Independent Living",
-    careTypes: ["Assisted Living"],
+    careTypes: [
+      "Assisted Living", "Social activities", "Exercise help",
+      "Transportation", "Health and wellness programs", "Meal service",
+      "Wellness checks", "Fall prevention", "Light housekeeping",
+      "Escort to appointments", "Shopping", "Errands",
+    ],
     highlights: ["Golf Course Access", "Fine Dining", "Spa Services"],
     acceptedPayments: ["Private Pay", "Long-term Insurance"],
     verified: true,
     badge: "Featured",
     description:
       "Luxury retirement living with resort-style amenities. From our championship golf course to our award-winning dining program, every detail is designed to make retirement the best chapter of your life.",
+    pricingDetails: [
+      { service: "Independent Living", rate: "$3,200", rateType: "per month" },
+      { service: "Assisted Living", rate: "$4,500", rateType: "per month" },
+    ],
+    staffScreening: { background_checked: true, licensed: true, insured: true },
+    reviews: [
+      {
+        name: "Richard M.",
+        rating: 5,
+        date: "December 2024",
+        comment: "Beautiful campus with excellent amenities. The golf course is a wonderful bonus. My wife and I have been here for three months and we've already made lifelong friends. The dining is top-notch.",
+        relationship: "Resident",
+      },
+    ],
   },
   {
     id: "6",
@@ -152,10 +306,17 @@ export const topProviders: Provider[] = [
     ],
     address: "789 Willow Lane, Austin, TX 78705",
     rating: 4.9,
-    reviewCount: 56,
+    reviewCount: 4,
     priceRange: "$4,800/mo",
     primaryCategory: "Hospice",
-    careTypes: ["Skilled Nursing", "Memory Care"],
+    careTypes: [
+      "Skilled Nursing", "Memory Care", "Vitals check", "24-hr care",
+      "Medication reminders", "Personal care assistants", "Wellness checks",
+      "Health and wellness programs", "Bathing assistance", "Dressing assistance",
+      "Meal service", "Fall prevention", "Incontinence care",
+      "Assistance with mobility", "Bathroom assistance", "Toileting assistance",
+      "Light housekeeping",
+    ],
     highlights: ["Palliative Care", "Family Counseling", "24/7 Support"],
     acceptedPayments: ["Medicare", "Medicaid", "Private Pay"],
     verified: true,
@@ -168,6 +329,42 @@ export const topProviders: Provider[] = [
       bio: "Hospice and palliative medicine specialist dedicated to ensuring comfort and quality of life for patients and their families.",
       image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200",
     },
+    pricingDetails: [
+      { service: "Hospice Care", rate: "$4,800", rateType: "per month" },
+      { service: "Palliative Care", rate: "$3,600", rateType: "per month" },
+      { service: "Skilled Nursing", rate: "$5,500", rateType: "per month" },
+    ],
+    staffScreening: { background_checked: true, licensed: true, insured: true },
+    reviews: [
+      {
+        name: "Catherine D.",
+        rating: 5,
+        date: "January 2025",
+        comment: "The team at Peaceful Pines provided the most compassionate care for my father during his final months. The nurses were attentive and the counseling support for our family was invaluable.",
+        relationship: "Daughter of Patient",
+      },
+      {
+        name: "William F.",
+        rating: 5,
+        date: "November 2024",
+        comment: "Words cannot express our gratitude. Every staff member treated my mother with such dignity and respect. The spiritual care program brought her so much comfort. An extraordinary place.",
+        relationship: "Son of Patient",
+      },
+      {
+        name: "Janet R.",
+        rating: 5,
+        date: "September 2024",
+        comment: "Dr. Watson and her team are truly remarkable. They kept my husband comfortable and pain-free, and made sure our whole family was supported through a very difficult time.",
+        relationship: "Spouse of Patient",
+      },
+      {
+        name: "Steven A.",
+        rating: 4,
+        date: "July 2024",
+        comment: "Very professional and caring staff. The facility is peaceful and well-maintained. Communication could sometimes be quicker but the quality of care itself was excellent.",
+        relationship: "Son of Patient",
+      },
+    ],
   },
 ];
 
@@ -239,6 +436,47 @@ export const providersByCategory: Record<string, Provider[]> = {
 };
 
 // ============================================================
+// Browse page exports
+// ============================================================
+
+/** Flat array of all providers for browse/search results */
+export const allBrowseProviders: Provider[] = [
+  ...topProviders,
+  ...Object.values(providersByCategory).flat(),
+];
+
+/** Map care type slug to display label */
+const careTypeLabelMap: Record<string, string> = {
+  "home-care": "Home Care",
+  "home-health": "Home Health",
+  "assisted-living": "Assisted Living",
+  "memory-care": "Memory Care",
+  "nursing-homes": "Nursing Homes",
+  "nursing-home": "Nursing Homes",
+  "independent-living": "Independent Living",
+  "hospice": "Hospice",
+};
+
+export function getCareTypeLabel(slug: string): string {
+  return careTypeLabelMap[slug] || "Senior Care";
+}
+
+/** Map care type slug to the primaryCategory value used on Provider objects */
+export function getCareTypeName(slug: string): string {
+  const nameMap: Record<string, string> = {
+    "home-care": "Home Care",
+    "home-health": "Home Health",
+    "assisted-living": "Assisted Living",
+    "memory-care": "Memory Care",
+    "nursing-homes": "Nursing Home",
+    "nursing-home": "Nursing Home",
+    "independent-living": "Independent Living",
+    "hospice": "Hospice",
+  };
+  return nameMap[slug] || "";
+}
+
+// ============================================================
 // Helpers
 // ============================================================
 
@@ -304,6 +542,9 @@ export function mockProviderToProfile(provider: Provider): Profile {
     staff?: StaffMember;
     badge?: string;
     accepted_payments?: string[];
+    pricing_details?: { service: string; rate: string; rateType: string }[];
+    staff_screening?: { background_checked: boolean; licensed: boolean; insured: boolean };
+    reviews?: { name: string; rating: number; date: string; comment: string; relationship?: string }[];
   } = {
     price_range: provider.priceRange,
     amenities: provider.highlights || [],
@@ -316,6 +557,9 @@ export function mockProviderToProfile(provider: Provider): Profile {
     staff: provider.staff,
     badge: provider.badge,
     accepted_payments: provider.acceptedPayments,
+    pricing_details: provider.pricingDetails,
+    staff_screening: provider.staffScreening,
+    reviews: provider.reviews,
   };
 
   return {
@@ -339,8 +583,8 @@ export function mockProviderToProfile(provider: Provider): Profile {
     service_area: "Greater Austin Area",
     care_types: [provider.primaryCategory, ...provider.careTypes],
     metadata,
-    claim_state: "claimed",
-    verification_state: provider.verified ? "verified" : "unverified",
+    claim_state: provider.reviews && provider.reviews.length > 0 ? "claimed" : "unclaimed",
+    verification_state: provider.reviews && provider.reviews.length > 0 ? "verified" : "unverified",
     source: "seeded",
     is_active: true,
     created_at: new Date().toISOString(),

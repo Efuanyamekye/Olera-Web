@@ -176,7 +176,7 @@ export default async function ProviderPage({
 
   if (!provider) {
     return (
-      <div className="bg-[#FFFEF8] min-h-screen flex items-center justify-center">
+      <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">Provider not found</h1>
           <p className="mt-2 text-gray-600">
@@ -221,7 +221,7 @@ export default async function ProviderPage({
   // ============================================================
 
   return (
-    <div className="bg-[#FFFEF8] min-h-screen">
+    <div className="bg-white min-h-screen">
 
       {/* ===== Breadcrumbs + Share ===== */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8">
@@ -239,7 +239,7 @@ export default async function ProviderPage({
                 <li><ChevronRightIcon className="w-3.5 h-3.5 text-gray-300" /></li>
                 <li>
                   <Link
-                    href={`/browse?category=${encodeURIComponent(provider.provider_category)}`}
+                    href={`/browse?type=${categoryLabel.toLowerCase().replace(/\s+/g, "-")}`}
                     className="hover:text-primary-600 transition-colors"
                   >
                     {categoryLabel}
@@ -269,8 +269,10 @@ export default async function ProviderPage({
         </div>
       </nav>
 
-      {/* ===== Main Two-Column Layout ===== */}
+      {/* ===== Main Layout ===== */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+
+        {/* ── Two-Column Grid (Image+Content | Sidebar) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* Left Column — Image + Content */}
@@ -325,7 +327,7 @@ export default async function ProviderPage({
             </div>
 
             {/* ── Content Sections ── */}
-            <div className="mt-[44px] space-y-[44px]">
+            <div className="mt-10 space-y-10">
 
               {/* Unclaimed Banner */}
               <div className="bg-warm-50 border border-warm-200 rounded-xl p-4 md:p-5">

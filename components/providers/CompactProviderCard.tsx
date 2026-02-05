@@ -13,7 +13,7 @@ export default function CompactProviderCard({ provider }: CompactProviderCardPro
       className="group bg-white rounded-xl border border-gray-100 shadow-xs overflow-hidden hover:shadow-md transition-shadow duration-200"
     >
       {/* Image */}
-      <div className="relative h-40 bg-gray-100">
+      <div className="relative h-32 bg-gray-100">
         {provider.image ? (
           <img
             src={provider.image}
@@ -35,7 +35,7 @@ export default function CompactProviderCard({ provider }: CompactProviderCardPro
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-1.5">
+      <div className="p-3 space-y-1">
         <p className="text-xs text-primary-600 font-medium uppercase tracking-wider">
           {provider.primaryCategory}
         </p>
