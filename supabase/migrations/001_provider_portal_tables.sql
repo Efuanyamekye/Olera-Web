@@ -205,12 +205,12 @@ CREATE POLICY "Service role can manage memberships" ON memberships
 -- ============================================
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $func$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$func$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_accounts_updated_at
   BEFORE UPDATE ON accounts
