@@ -13,9 +13,10 @@ _What's the main thing being worked on right now?_
   - **iOS APPROVED** (2026-02-05) - Can proceed with schema changes
   - ✅ Phase 1: Schema analysis complete, migration file created
   - ✅ Phase 2: Code merge complete (build passes)
-  - ⏳ Phase 3: Integration testing ← CURRENT
+  - ✅ Phase 3a: SQL migration run in Supabase (tables created)
+  - ⏳ Phase 3b: Add env var + merge PR ← CURRENT
   - Phase 4: Deploy & verify
-  - **BLOCKER**: Need to run SQL migration in Supabase + add `SUPABASE_SERVICE_ROLE_KEY` to Vercel
+  - **PR #23**: https://github.com/olera-care/olera-web/pull/23
 
 - **Supabase Unification**: ✅ COMPLETE
   - All pages connected to iOS Supabase
@@ -44,10 +45,10 @@ _Active work items and their current state._
 
 _Items waiting on decisions, external input, or dependencies._
 
-- **PR #21 Integration - Awaiting user actions:**
-  1. Run SQL migration in Supabase: `supabase/migrations/001_provider_portal_tables.sql`
+- **PR #23 - Ready to merge after:**
+  1. ~~Run SQL migration in Supabase~~ ✅ Done
   2. Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel environment variables
-  3. Then: merge `feature/provider-portal` branch to main
+  3. Merge PR #23 (`feature/provider-portal` → `main`)
 
 ---
 
@@ -125,11 +126,17 @@ _Useful context, patterns noticed, things to remember._
   - Portal → reads/writes `business_profiles` (user's copy)
   - See: `plans/provider-data-architecture.md`
 - **Committed**: `c3967ea` on `feature/provider-portal` branch
+- **Created PR #23**: https://github.com/olera-care/olera-web/pull/23
+- **SQL Migration Run** ✅ - Tables created in Supabase:
+  - `accounts` - web portal user identity
+  - `business_profiles` - orgs/caregivers/families with `source_provider_id`
+  - `memberships` - subscription info
+  - `connections` - inquiries/saves
 - **Next steps**:
-  1. Run SQL migration in Supabase (user action)
+  1. ~~Run SQL migration in Supabase~~ ✅ Done
   2. Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel (user action)
-  3. Merge `feature/provider-portal` to main
-  4. Complete integration testing (Phase 3)
+  3. Merge PR #23 to main
+  4. Test provider portal flows
   5. Deploy to production
 
 ### 2026-02-05
