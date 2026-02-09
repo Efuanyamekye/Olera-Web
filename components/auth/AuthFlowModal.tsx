@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -157,15 +157,15 @@ function getStepConfig(step: AuthFlowStep, data: FlowData, isAuthenticated: bool
   const isProvider = data.intent === "provider";
   const isOrg = data.providerType === "organization";
 
-  // Provider path: type(1) → info(2) → search?(3) → visibility(3/4) → auth(4/5) → verify?(5/6)
-  // Family path: info(1) → needs(2) → auth(3) → verify?(4)
+  // Provider path: type(1) → info(2) → search?(3) → auth(3/4)
+  // Family path: info(1) → needs(2) → auth(3)
 
   let totalSteps: number;
   let stepNumber: number;
 
   if (isProvider) {
-    // Provider steps: type, info, search(org only), visibility, auth(if needed)
-    totalSteps = isOrg ? 5 : 4;
+    // Provider steps: type, info, search(org only), auth(if needed)
+    totalSteps = isOrg ? 3 : 2;
     if (!isAuthenticated) totalSteps += 1; // Add auth step
 
     const stepMap: Record<string, number> = {
@@ -173,9 +173,9 @@ function getStepConfig(step: AuthFlowStep, data: FlowData, isAuthenticated: bool
       "provider-type": 1,
       "provider-info": 2,
       "org-search": 3,
-      "visibility": isOrg ? 4 : 3,
-      "auth": isOrg ? 5 : 4,
-      "verify-code": isOrg ? 5 : 4, // Same as auth
+      "visibility": isOrg ? 3 : 2, // kept for type safety, not used
+      "auth": isOrg ? 4 : 3,
+      "verify-code": isOrg ? 4 : 3, // Same as auth
     };
     stepNumber = stepMap[step] || 1;
   } else {
@@ -197,7 +197,7 @@ function getStepConfig(step: AuthFlowStep, data: FlowData, isAuthenticated: bool
     "provider-type": "Tell us about yourself",
     "provider-info": data.providerType === "organization" ? "About your organization" : "About you",
     "org-search": "Is your organization listed?",
-    "visibility": "Who can find you?",
+    "visibility": "Who can find you?", // kept for type safety
     "family-info": "Who needs care?",
     "family-needs": "Care preferences",
     "auth": "Create your account",
@@ -228,9 +228,9 @@ export default function AuthFlowModal({
 
   // Determine starting step based on context
   const getInitialStep = useCallback((): AuthFlowStep => {
-    // Claim flow: skip directly to visibility since we have the profile
+    // Claim flow: skip directly to auth since we have the profile data
     if (claimProfile) {
-      return "visibility";
+      return "auth";
     }
     if (initialIntent === "provider") {
       return initialProviderType ? "provider-info" : "provider-type";
@@ -405,6 +405,19 @@ export default function AuthFlowModal({
     }
   }, [resendCooldown]);
 
+  // Auto-complete claim flows when user is already authenticated
+  const claimAutoCompleteRef = useRef(false);
+  useEffect(() => {
+    if (isOpen && claimProfile && user && !claimAutoCompleteRef.current) {
+      claimAutoCompleteRef.current = true;
+      handleComplete();
+    }
+    if (!isOpen) {
+      claimAutoCompleteRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, claimProfile, user]);
+
   // ──────────────────────────────────────────────────────────
   // Data Update Helper
   // ──────────────────────────────────────────────────────────
@@ -436,16 +449,6 @@ export default function AuthFlowModal({
       case "org-search":
         setStep("provider-info");
         break;
-      case "visibility":
-        // Can't go back if this is a claim flow (started with claimProfile)
-        if (claimProfile) {
-          // Nowhere to go back to - claim flow starts at visibility
-        } else if (data.providerType === "organization") {
-          setStep("org-search");
-        } else {
-          setStep("provider-info");
-        }
-        break;
       case "family-info":
         if (initialIntent === null) {
           setStep("intent");
@@ -455,8 +458,14 @@ export default function AuthFlowModal({
         setStep("family-info");
         break;
       case "auth":
-        if (data.intent === "provider") {
-          setStep("visibility");
+        if (claimProfile) {
+          // Claim flow starts at auth - can't go back
+        } else if (data.intent === "provider") {
+          if (data.providerType === "organization") {
+            setStep("org-search");
+          } else {
+            setStep("provider-info");
+          }
         } else {
           setStep("family-needs");
         }
@@ -474,8 +483,8 @@ export default function AuthFlowModal({
     if (step === "provider-type" && initialIntent === "provider") return false;
     if (step === "provider-info" && initialProviderType) return false;
     if (step === "family-info" && initialIntent === "family") return false;
-    // Claim flow starts at visibility - can't go back
-    if (step === "visibility" && claimProfile) return false;
+    // Claim flow starts at auth - can't go back
+    if (step === "auth" && claimProfile) return false;
     return true;
   };
 
@@ -505,8 +514,11 @@ export default function AuthFlowModal({
     if (data.providerType === "organization") {
       setSearchQuery(data.orgName);
       setStep("org-search");
+    } else if (user) {
+      // Already authenticated — skip to profile creation
+      handleComplete();
     } else {
-      setStep("visibility");
+      setStep("auth");
     }
   };
 
@@ -515,7 +527,8 @@ export default function AuthFlowModal({
     return (
       name.trim().length > 0 &&
       (data.city.trim().length > 0 || data.state.trim().length > 0) &&
-      data.careTypes.length > 0
+      data.careTypes.length > 0 &&
+      data.phone.trim().length > 0
     );
   };
 
@@ -526,13 +539,19 @@ export default function AuthFlowModal({
 
     try {
       const supabase = createClient();
-      const { data: profiles, error: searchErr } = await supabase
+      let searchQuery = supabase
         .from("business_profiles")
         .select("*")
         .eq("type", "organization")
         .eq("claim_state", "unclaimed")
-        .ilike("display_name", `%${query.trim()}%`)
-        .limit(10);
+        .ilike("display_name", `%${query.trim()}%`);
+
+      // Filter by state if provided to reduce noise
+      if (data.state?.trim()) {
+        searchQuery = searchQuery.ilike("state", data.state.trim());
+      }
+
+      const { data: profiles, error: searchErr } = await searchQuery.limit(10);
 
       if (searchErr) {
         setSearchResults([]);
@@ -545,7 +564,7 @@ export default function AuthFlowModal({
       setHasSearched(true);
       setSearching(false);
     }
-  }, []);
+  }, [data.state]);
 
   // Auto-search when entering org-search step
   useEffect(() => {
@@ -564,19 +583,10 @@ export default function AuthFlowModal({
         });
       }
     }
-    setStep("visibility");
-  };
-
-  // ──────────────────────────────────────────────────────────
-  // Visibility → Auth or Complete
-  // ──────────────────────────────────────────────────────────
-
-  const handleVisibilityNext = () => {
     if (user) {
-      // Already authenticated - skip to profile creation
+      // Already authenticated — skip to profile creation
       handleComplete();
     } else {
-      // Need to authenticate first
       setStep("auth");
     }
   };
@@ -1145,17 +1155,6 @@ export default function AuthFlowModal({
         />
       )}
 
-      {/* Step: Visibility */}
-      {step === "visibility" && (
-        <VisibilityStep
-          data={data}
-          updateData={updateData}
-          loading={loading}
-          onNext={handleVisibilityNext}
-          isAuthenticated={!!user}
-        />
-      )}
-
       {/* Step: Family Info */}
       {step === "family-info" && (
         <FamilyInfoStep
@@ -1406,6 +1405,35 @@ function ProviderInfoStep({
         </div>
       </div>
 
+      <Input
+        label="Phone number"
+        type="tel"
+        value={data.phone}
+        onChange={(e) => updateData({ phone: (e.target as HTMLInputElement).value })}
+        placeholder="(555) 123-4567"
+        required
+      />
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Short description <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <textarea
+          value={data.description}
+          onChange={(e) => updateData({ description: e.target.value })}
+          placeholder={isOrg
+            ? "Tell families a bit about your organization..."
+            : "Tell families a bit about yourself and your experience..."
+          }
+          rows={3}
+          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm resize-none"
+        />
+      </div>
+
+      <p className="text-xs text-gray-400">
+        Your profile will be visible by default. You can change this anytime in Settings.
+      </p>
+
       <Button
         type="button"
         onClick={onNext}
@@ -1463,9 +1491,17 @@ function OrgSearchStep({
       {hasSearched && (
         <div className="max-h-60 overflow-y-auto space-y-2">
           {searchResults.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4 text-center">
-              No matching organizations found. You can create a new profile.
-            </p>
+            <div className="py-6 text-center">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-700">No matching organizations found</p>
+              <p className="text-xs text-gray-500 mt-1">
+                We&apos;ll create a new profile for you
+              </p>
+            </div>
           ) : (
             searchResults.map((org) => (
               <button
@@ -1503,68 +1539,14 @@ function OrgSearchStep({
       )}
 
       <Button type="button" onClick={onNext} fullWidth size="lg">
-        {selectedOrgId ? "Claim this organization" : "Create new profile"}
+        {selectedOrgId ? "Claim this organization" : "Continue with new profile"}
       </Button>
-    </div>
-  );
-}
 
-function VisibilityStep({
-  data,
-  updateData,
-  loading,
-  onNext,
-  isAuthenticated,
-}: {
-  data: FlowData;
-  updateData: (partial: Partial<FlowData>) => void;
-  loading: boolean;
-  onNext: () => void;
-  isAuthenticated: boolean;
-}) {
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-600 mb-4">
-        Control who can discover your profile on Olera.
-      </p>
-
-      <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={data.visibleToFamilies}
-          onChange={(e) => updateData({ visibleToFamilies: e.target.checked })}
-          className="mt-0.5 h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-        />
-        <div>
-          <p className="font-medium text-gray-900">Visible to families</p>
-          <p className="text-sm text-gray-500">
-            Families searching for care can find and contact you
-          </p>
-        </div>
-      </label>
-
-      <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={data.visibleToProviders}
-          onChange={(e) => updateData({ visibleToProviders: e.target.checked })}
-          className="mt-0.5 h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-        />
-        <div>
-          <p className="font-medium text-gray-900">
-            {data.providerType === "organization" ? "Visible to caregivers" : "Visible to organizations"}
-          </p>
-          <p className="text-sm text-gray-500">
-            {data.providerType === "organization"
-              ? "Caregivers can find you for employment opportunities"
-              : "Organizations can find you for job opportunities"}
-          </p>
-        </div>
-      </label>
-
-      <Button type="button" onClick={onNext} loading={loading} fullWidth size="lg">
-        {isAuthenticated ? "Complete setup" : "Continue"}
-      </Button>
+      {hasSearched && searchResults.length > 0 && !selectedOrgId && (
+        <p className="text-xs text-gray-400 text-center">
+          Don&apos;t see your organization? Continue to create a new profile.
+        </p>
+      )}
     </div>
   );
 }
@@ -1708,6 +1690,14 @@ function AuthStep({
   onSendOtpCode: () => void;
   onBack: () => void;
 }) {
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [socialToast, setSocialToast] = useState("");
+
+  const handleSocialClick = (provider: string) => {
+    setSocialToast(`${provider} sign-in coming soon`);
+    setTimeout(() => setSocialToast(""), 2500);
+  };
+
   return (
     <div>
       {/* Back button for auth step */}
@@ -1722,78 +1712,148 @@ function AuthStep({
         Back
       </button>
 
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-gray-600 mb-5">
         {mode === "sign-up"
           ? "Create an account to save your profile and start connecting."
           : "Sign in to your existing account."}
       </p>
 
-      <form onSubmit={mode === "sign-up" ? onSignUp : onSignIn} className="space-y-4">
-        <Input
-          label="Email"
-          type="email"
-          name="email"
-          value={data.email}
-          onChange={(e) => updateData({ email: (e.target as HTMLInputElement).value })}
-          placeholder="you@example.com"
-          required
-          autoComplete="email"
-        />
+      {/* Social auth buttons (primary) */}
+      <div className="space-y-2.5 mb-4">
+        <button
+          type="button"
+          onClick={() => handleSocialClick("Apple")}
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition-colors min-h-[44px]"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+          </svg>
+          Continue with Apple
+        </button>
 
-        <div>
+        <button
+          type="button"
+          onClick={() => handleSocialClick("Google")}
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-50 transition-colors min-h-[44px]"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleSocialClick("Facebook")}
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#1877F2] text-white rounded-lg font-medium text-sm hover:bg-[#166FE5] transition-colors min-h-[44px]"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Continue with Facebook
+        </button>
+      </div>
+
+      {/* Toast for social auth */}
+      {socialToast && (
+        <div className="mb-4 bg-gray-100 text-gray-600 px-4 py-2.5 rounded-lg text-sm text-center">
+          {socialToast}
+        </div>
+      )}
+
+      {/* Divider */}
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-3 bg-white text-gray-400">or</span>
+        </div>
+      </div>
+
+      {/* Email form (secondary) */}
+      {!showEmailForm ? (
+        <button
+          type="button"
+          onClick={() => setShowEmailForm(true)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors min-h-[44px]"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Continue with email
+        </button>
+      ) : (
+        <form onSubmit={mode === "sign-up" ? onSignUp : onSignIn} className="space-y-3">
           <Input
-            label="Password"
-            type="password"
-            name="password"
-            value={data.password}
-            onChange={(e) => updateData({ password: (e.target as HTMLInputElement).value })}
-            placeholder={mode === "sign-up" ? "At least 8 characters" : "Your password"}
+            label="Email"
+            type="email"
+            name="email"
+            value={data.email}
+            onChange={(e) => updateData({ email: (e.target as HTMLInputElement).value })}
+            placeholder="you@example.com"
             required
-            autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
-            helpText={mode === "sign-up" ? "Must be at least 8 characters" : undefined}
+            autoComplete="email"
           />
-          {mode === "sign-in" && (
+
+          <div>
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              value={data.password}
+              onChange={(e) => updateData({ password: (e.target as HTMLInputElement).value })}
+              placeholder={mode === "sign-up" ? "At least 8 characters" : "Your password"}
+              required
+              autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+              helpText={mode === "sign-up" ? "Must be at least 8 characters" : undefined}
+            />
+            {mode === "sign-in" && (
+              <button
+                type="button"
+                onClick={onSendOtpCode}
+                disabled={loading || !data.email.trim()}
+                className="mt-2 text-sm text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Email me a code instead
+              </button>
+            )}
+          </div>
+
+          <Button type="submit" loading={loading} fullWidth size="md">
+            {mode === "sign-up" ? "Create account & finish" : "Sign in & finish"}
+          </Button>
+        </form>
+      )}
+
+      <p className="text-center text-sm text-gray-500 pt-4">
+        {mode === "sign-up" ? (
+          <>
+            Already have an account?{" "}
             <button
               type="button"
-              onClick={onSendOtpCode}
-              disabled={loading || !data.email.trim()}
-              className="mt-2 text-sm text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setMode("sign-in")}
+              className="text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline"
             >
-              Email me a code instead
+              Sign in
             </button>
-          )}
-        </div>
-
-        <Button type="submit" loading={loading} fullWidth size="md">
-          {mode === "sign-up" ? "Create account & finish" : "Sign in & finish"}
-        </Button>
-
-        <p className="text-center text-base text-gray-500 pt-2">
-          {mode === "sign-up" ? (
-            <>
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => setMode("sign-in")}
-                className="text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline"
-              >
-                Sign in
-              </button>
-            </>
-          ) : (
-            <>
-              New to Olera?{" "}
-              <button
-                type="button"
-                onClick={() => setMode("sign-up")}
-                className="text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline"
-              >
-                Create an account
-              </button>
-            </>
-          )}
-        </p>
-      </form>
+          </>
+        ) : (
+          <>
+            New to Olera?{" "}
+            <button
+              type="button"
+              onClick={() => setMode("sign-up")}
+              className="text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline"
+            >
+              Create an account
+            </button>
+          </>
+        )}
+      </p>
     </div>
   );
 }

@@ -94,57 +94,55 @@ export default function Navbar() {
               <span className="text-xl font-bold text-gray-900">Olera</span>
             </Link>
 
-            {/* Desktop Navigation — middle section */}
-            {!isAuthenticated && (
-              <div className="hidden lg:flex items-center gap-1">
-                {/* Find Care trigger */}
-                <div onMouseEnter={() => setIsFindCareOpen(true)}>
-                  <button
-                    type="button"
-                    onClick={() => setIsFindCareOpen((prev) => !prev)}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[15px] font-medium transition-colors ${
-                      isFindCareOpen
-                        ? "bg-gray-100 text-gray-900"
-                        : "text-gray-700 hover:bg-gray-50"
+            {/* Desktop Navigation — middle section (always visible, route-based not auth-based) */}
+            <div className="hidden lg:flex items-center gap-1">
+              {/* Find Care trigger */}
+              <div onMouseEnter={() => setIsFindCareOpen(true)}>
+                <button
+                  type="button"
+                  onClick={() => setIsFindCareOpen((prev) => !prev)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[15px] font-medium transition-colors ${
+                    isFindCareOpen
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                  aria-expanded={isFindCareOpen}
+                  aria-haspopup="true"
+                >
+                  Find Care
+                  <svg
+                    className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${
+                      isFindCareOpen ? "rotate-180" : ""
                     }`}
-                    aria-expanded={isFindCareOpen}
-                    aria-haspopup="true"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    Find Care
-                    <svg
-                      className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${
-                        isFindCareOpen ? "rotate-180" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Simple nav links */}
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-50 rounded-full transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
               </div>
-            )}
+
+              {/* Simple nav links */}
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-50 rounded-full transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
             {/* Desktop Right — utility actions */}
             <div className="hidden lg:flex items-center space-x-4">
-              {!isAuthenticated && !isLoading && (
+              {!isLoading && (
                 <Link
                   href="/for-providers"
                   className="text-[15px] font-medium text-gray-700 hover:text-primary-600 transition-colors focus:outline-none focus:underline whitespace-nowrap"
@@ -159,18 +157,15 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[44px]"
+                    className="flex items-center gap-1.5 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[44px]"
                     aria-label="User menu"
                     aria-expanded={isUserMenuOpen}
                   >
                     <div className="w-8 h-8 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-sm font-semibold">
                       {initials}
                     </div>
-                    <span className="text-base text-gray-700 font-medium max-w-[150px] truncate">
-                      {displayName}
-                    </span>
                     <svg
-                      className={`w-4 h-4 text-gray-500 transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`}
+                      className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -316,95 +311,92 @@ export default function Navbar() {
           {isMobileMenuOpen && (
             <div className="lg:hidden py-4 border-t border-gray-100">
               <div className="flex flex-col space-y-1">
-                {/* Find Care accordion — for unauthenticated users only */}
-                {!isAuthenticated && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setIsMobileCareOpen((prev) => !prev)}
-                      className="flex items-center justify-between w-full py-3 text-gray-700 hover:text-primary-600 font-medium"
-                      aria-expanded={isMobileCareOpen}
-                    >
-                      Find Care
-                      <svg
-                        className={`w-4 h-4 transition-transform ${
-                          isMobileCareOpen ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-                    {isMobileCareOpen && (
-                      <div className="pl-4 pb-2 space-y-1">
-                        {CARE_CATEGORIES.map((cat) => (
-                          <Link
-                            key={cat.id}
-                            href={`/browse?type=${cat.id}`}
-                            className="block py-2 text-sm text-gray-600 hover:text-primary-600"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <span className="font-medium">{cat.label}</span>
-                            <span className="block text-xs text-gray-400 mt-0.5">
-                              {cat.description}
-                            </span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Simple nav links */}
-                    {NAV_LINKS.map((link) => (
+                {/* Find Care accordion — always visible (route-based nav) */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileCareOpen((prev) => !prev)}
+                  className="flex items-center justify-between w-full py-3 text-gray-700 hover:text-primary-600 font-medium"
+                  aria-expanded={isMobileCareOpen}
+                >
+                  Find Care
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      isMobileCareOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+                {isMobileCareOpen && (
+                  <div className="pl-4 pb-2 space-y-1">
+                    {CARE_CATEGORIES.map((cat) => (
                       <Link
-                        key={link.label}
-                        href={link.href}
-                        className="block py-3 text-gray-700 hover:text-primary-600 font-medium"
+                        key={cat.id}
+                        href={`/browse?type=${cat.id}`}
+                        className="block py-2 text-sm text-gray-600 hover:text-primary-600"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        {link.label}
+                        <span className="font-medium">{cat.label}</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">
+                          {cat.description}
+                        </span>
                       </Link>
                     ))}
-                  </>
+                  </div>
                 )}
 
-                {!isAuthenticated && (
+                {/* Simple nav links */}
+                {NAV_LINKS.map((link) => (
                   <Link
-                    href="/for-providers"
-                    className="block py-3 text-gray-600 hover:text-primary-600 font-medium"
+                    key={link.label}
+                    href={link.href}
+                    className="block py-3 text-gray-700 hover:text-primary-600 font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    For Providers
+                    {link.label}
                   </Link>
-                )}
+                ))}
+
+                <Link
+                  href="/for-providers"
+                  className="block py-3 text-gray-600 hover:text-primary-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  For Providers
+                </Link>
+
                 <hr className="border-gray-100" />
+
+                {/* Authenticated section */}
                 {isAuthenticated ? (
                   <>
                     {hasProfile ? (
                       <>
                         <Link
                           href="/portal"
-                          className="text-gray-600 hover:text-primary-600 font-medium"
+                          className="block py-3 text-gray-600 hover:text-primary-600 font-medium"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Dashboard
                         </Link>
                         <Link
                           href="/portal/profile"
-                          className="text-gray-600 hover:text-primary-600 font-medium"
+                          className="block py-3 text-gray-600 hover:text-primary-600 font-medium"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Edit Profile
                         </Link>
                         <Link
                           href="/portal/connections"
-                          className="text-gray-600 hover:text-primary-600 font-medium"
+                          className="block py-3 text-gray-600 hover:text-primary-600 font-medium"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           {isProvider ? "Connections" : "My Inquiries"}
@@ -412,7 +404,7 @@ export default function Navbar() {
                         {isProvider && (
                           <Link
                             href="/portal/settings"
-                            className="text-gray-600 hover:text-primary-600 font-medium"
+                            className="block py-3 text-gray-600 hover:text-primary-600 font-medium"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
                             Settings
@@ -422,7 +414,7 @@ export default function Navbar() {
                     ) : (
                       <Link
                         href="/onboarding"
-                        className="text-primary-600 hover:text-primary-700 font-medium"
+                        className="block py-3 text-primary-600 hover:text-primary-700 font-medium"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Complete your profile
