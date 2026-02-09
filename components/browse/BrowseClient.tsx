@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import ProviderCard from "@/components/providers/ProviderCard";
 import type { Provider as ProviderCardType } from "@/components/providers/ProviderCard";
 import { useNavbar } from "@/components/shared/NavbarContext";
+import Pagination from "@/components/ui/Pagination";
 import { createClient } from "@/lib/supabase/client";
 import {
   type Provider as SupabaseProvider,
@@ -78,6 +79,8 @@ function getCareTypeLabel(id: string): string {
 }
 
 type ViewMode = "carousel" | "grid" | "map";
+
+const PROVIDERS_PER_PAGE = 24;
 
 // Helper function to parse price for sorting
 function parsePrice(price: string): number {
@@ -169,6 +172,7 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
   const [sortBy, setSortBy] = useState("recommended");
   const [viewMode, setViewMode] = useState<ViewMode>("carousel");
   const [hoveredProviderId, setHoveredProviderId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Dropdown states
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -395,6 +399,18 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
 
     return result;
   }, [providers, selectedRating, selectedPayment, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredProviders.length / PROVIDERS_PER_PAGE);
+  const paginatedProviders = useMemo(() => {
+    const startIndex = (currentPage - 1) * PROVIDERS_PER_PAGE;
+    return filteredProviders.slice(startIndex, startIndex + PROVIDERS_PER_PAGE);
+  }, [filteredProviders, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [careType, selectedRating, selectedPayment, sortBy]);
 
   // Categorized providers for carousel view - override badges to match section
   const topRatedProviders = useMemo(
@@ -988,15 +1004,19 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
             {filteredProviders.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filteredProviders.map((provider, index) => (
+                  {paginatedProviders.map((provider, index) => (
                     <ProviderCard key={`${provider.id}-${index}`} provider={provider} />
                   ))}
                 </div>
-                <div className="py-8 text-center">
-                  <button className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50 transition-all">
-                    Load more providers
-                  </button>
-                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={filteredProviders.length}
+                  itemsPerPage={PROVIDERS_PER_PAGE}
+                  onPageChange={setCurrentPage}
+                  itemLabel="providers"
+                  className="mt-8"
+                />
               </>
             ) : (
               <EmptyState onClear={clearFilters} />
@@ -1035,11 +1055,15 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
                         </div>
                       ))}
                     </div>
-                    <div className="py-6 text-center">
-                      <button className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50 transition-all bg-white">
-                        Load more providers
-                      </button>
-                    </div>
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      totalItems={filteredProviders.length}
+                      itemsPerPage={PROVIDERS_PER_PAGE}
+                      onPageChange={setCurrentPage}
+                      itemLabel="providers"
+                      className="mt-6"
+                    />
                   </>
                 ) : (
                   <EmptyState onClear={clearFilters} />
