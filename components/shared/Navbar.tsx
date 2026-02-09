@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import FindCareMegaMenu from "./FindCareMegaMenu";
 import { NAV_LINKS } from "./NavMenuData";
 import { useNavbar } from "./NavbarContext";
@@ -11,6 +12,16 @@ export default function Navbar() {
   const [isFindCareOpen, setIsFindCareOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { visible } = useNavbar();
+  const pathname = usePathname();
+
+  // Check if a nav link is active
+  // Resources should only be active on /resources exactly, not on article pages
+  const isLinkActive = (href: string) => {
+    if (href === "/resources") {
+      return pathname === "/resources";
+    }
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   // Track scroll position for navbar background
   useEffect(() => {
@@ -93,7 +104,11 @@ export default function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-50 rounded-full transition-colors"
+                  className={`px-4 py-2 text-[15px] font-medium rounded-full transition-colors ${
+                    isLinkActive(link.href)
+                      ? "text-primary-600"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -169,7 +184,11 @@ export default function Navbar() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="text-gray-600 hover:text-primary-600 font-medium"
+                    className={`font-medium ${
+                      isLinkActive(link.href)
+                        ? "text-primary-600"
+                        : "text-gray-600 hover:text-primary-600"
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {link.label}
