@@ -41,7 +41,7 @@ export default function BrowseFamiliesPage() {
     const fetchFamilies = async () => {
       const supabase = createClient();
       const { data } = await supabase
-        .from("profiles")
+        .from("business_profiles")
         .select("*")
         .eq("type", "family")
         .eq("is_active", true)

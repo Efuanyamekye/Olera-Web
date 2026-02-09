@@ -43,7 +43,7 @@ function BrowseProvidersContent() {
     const fetchOrgs = async () => {
       const supabase = createClient();
       const { data } = await supabase
-        .from("profiles")
+        .from("business_profiles")
         .select("*")
         .eq("type", "organization")
         .eq("is_active", true)

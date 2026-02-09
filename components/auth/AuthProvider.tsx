@@ -216,7 +216,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (event === "SIGNED_IN" && session?.user) {
-        // New sign-in: must fetch fresh data (ok to show loading briefly)
+        // New sign-in: fetch fresh data, but never overwrite good state with null.
         const version = ++versionRef.current;
         let data = await fetchAccountData(session.user.id);
 
@@ -229,14 +229,24 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
         if (cancelled || versionRef.current !== version) return;
 
-        setState({
-          user: { id: session.user.id, email: session.user.email! },
-          account: data?.account ?? null,
-          activeProfile: data?.activeProfile ?? null,
-          profiles: data?.profiles ?? [],
-          membership: data?.membership ?? null,
-          isLoading: false,
-        });
+        if (data) {
+          setState({
+            user: { id: session.user.id, email: session.user.email! },
+            account: data.account,
+            activeProfile: data.activeProfile,
+            profiles: data.profiles,
+            membership: data.membership,
+            isLoading: false,
+          });
+        } else {
+          // Fetch failed — set user (so we don't show "Sign in required")
+          // but preserve any existing account/profile data.
+          setState((prev) => ({
+            ...prev,
+            user: { id: session.user.id, email: session.user.email! },
+            isLoading: false,
+          }));
+        }
       }
 
       if (event === "TOKEN_REFRESHED" && session?.user) {

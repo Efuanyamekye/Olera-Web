@@ -73,7 +73,7 @@ export default function ConnectionsPage() {
       let profiles: Profile[] = [];
       if (profileIds.size > 0) {
         const { data: profileData } = await supabase
-          .from("profiles")
+          .from("business_profiles")
           .select("*")
           .in("id", Array.from(profileIds));
         profiles = (profileData as Profile[]) || [];

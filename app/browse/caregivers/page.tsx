@@ -44,7 +44,7 @@ function BrowseCaregiversContent() {
     const fetchCaregivers = async () => {
       const supabase = createClient();
       const { data } = await supabase
-        .from("profiles")
+        .from("business_profiles")
         .select("*")
         .eq("type", "caregiver")
         .eq("is_active", true)
