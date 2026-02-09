@@ -40,22 +40,11 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh the session — this is critical for server components
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Protected routes: redirect to home if not authenticated
-  const protectedPaths = ["/portal", "/onboarding", "/admin"];
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  if (isProtectedPath && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
+  // Refresh the session — keeps auth cookies fresh.
+  // We intentionally do NOT redirect on failure here: a transient server-side
+  // getUser() failure (slow network, Supabase hiccup) should not kick the user
+  // out. The client-side AuthProvider + portal layout handle auth guards.
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }

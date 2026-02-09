@@ -69,7 +69,7 @@ const EMPTY_STATE: AuthState = {
   isLoading: false,
 };
 
-const FETCH_TIMEOUT_MS = 10000;
+const FETCH_TIMEOUT_MS = 30000;
 
 /** Race a promise against a timeout. Returns null on timeout. */
 function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T | null> {
@@ -176,7 +176,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       if (cancelled) return;
 
       if (session?.user) {
-        const data = await fetchAccountData(session.user.id);
+        let data = await fetchAccountData(session.user.id);
+
+        // Retry once if account data didn't load (DB lag, transient timeout)
+        if (!data?.account) {
+          await new Promise((r) => setTimeout(r, 1500));
+          if (cancelled) return;
+          data = await fetchAccountData(session.user.id);
+        }
+
         if (cancelled) return;
 
         setState({

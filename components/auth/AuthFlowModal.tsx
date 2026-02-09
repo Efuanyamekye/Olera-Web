@@ -912,8 +912,13 @@ export default function AuthFlowModal({
 
       if (data.intent === "provider") {
         profileId = await createProviderProfile(supabase, accountRow.id);
-      } else {
+      } else if (data.intent === "family") {
         profileId = await createFamilyProfile(supabase, accountRow.id);
+      } else {
+        // No intent set — cannot create a profile without explicit user intent
+        setError("Please select whether you're looking for care or providing care.");
+        setLoading(false);
+        return;
       }
 
       // Update account
