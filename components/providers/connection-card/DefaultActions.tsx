@@ -3,7 +3,6 @@
 import PhoneButton from "./PhoneButton";
 
 interface DefaultActionsProps {
-  providerName: string;
   phone: string | null;
   phoneRevealed: boolean;
   saved: boolean;
@@ -31,7 +30,6 @@ function HeartIcon({ filled }: { filled: boolean }) {
 }
 
 export default function DefaultActions({
-  providerName,
   phone,
   phoneRevealed,
   saved,
@@ -46,7 +44,7 @@ export default function DefaultActions({
         onClick={onConnect}
         className="w-full py-3.5 bg-primary-600 hover:bg-primary-500 text-white border-none rounded-[10px] text-base font-semibold cursor-pointer tracking-tight transition-colors"
       >
-        Connect with {providerName}
+        Connect
       </button>
 
       {/* Masked phone */}

@@ -45,7 +45,6 @@ export default function ConnectionCard(props: ConnectionCardProps) {
       <div className="px-5 py-5">
         {hook.cardState === "default" && (
           <DefaultActions
-            providerName={providerName}
             phone={phone}
             phoneRevealed={hook.phoneRevealed}
             saved={hook.saved}

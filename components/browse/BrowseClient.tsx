@@ -544,7 +544,7 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
               </button>
 
               {showLocationDropdown && (
-                <div className="absolute left-0 top-[calc(100%+8px)] w-[380px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 z-[100] max-h-[340px] overflow-y-auto">
+                <div className="absolute left-0 top-[calc(100%+8px)] w-[300px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 z-[100] max-h-[340px] overflow-y-auto">
                   {/* Search Input */}
                   <div className="px-3 pb-2">
                     <div className={`flex items-center px-4 py-3 bg-gray-50 rounded-xl border transition-colors ${
@@ -1086,7 +1086,7 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
 
             {/* Right Side - Interactive Map */}
             <div className="hidden lg:flex flex-col w-[600px] h-full pt-6 pb-[90px] pl-0" style={{ paddingRight: "max(calc((100vw - 80rem) / 2 + 2rem), 1rem)" }}>
-              <div className="relative w-full flex-1 min-h-0 rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+              <div className="relative w-full flex-1 min-h-0 rounded-2xl overflow-hidden shadow-sm border border-gray-200 isolate">
                 <BrowseMap
                   providers={filteredProviders}
                   hoveredProviderId={hoveredProviderId}
