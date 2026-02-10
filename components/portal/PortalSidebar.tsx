@@ -86,8 +86,8 @@ function getSidebarNav(profileType: string | undefined): SidebarNav {
 
   if (profileType === "family") {
     mainItems.push(
-      { label: "My Inquiries", href: "/portal/connections", icon: icons.inquiries },
-      { label: "Activity", href: "/portal/calendar", icon: icons.calendar }
+      { label: "My Care", href: "/my-care", icon: icons.saved },
+      { label: "Appointments", href: "/portal/calendar", icon: icons.calendar }
     );
   }
 

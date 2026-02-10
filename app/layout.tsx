@@ -6,6 +6,7 @@ import AuthProvider from "@/components/auth/AuthProvider";
 import AuthModal from "@/components/auth/AuthModal";
 import GlobalAuthFlowModal from "@/components/auth/GlobalAuthFlowModal";
 import { NavbarProvider } from "@/components/shared/NavbarContext";
+import { SavedProvidersProvider } from "@/hooks/use-saved-providers";
 
 export const metadata: Metadata = {
   title: "Olera | Find Senior Care Near You",
@@ -30,13 +31,15 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-50 min-h-screen flex flex-col font-sans">
         <AuthProvider>
-          <NavbarProvider>
-            <Navbar />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <AuthModal />
-            <GlobalAuthFlowModal />
-          </NavbarProvider>
+          <SavedProvidersProvider>
+            <NavbarProvider>
+              <Navbar />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <AuthModal />
+              <GlobalAuthFlowModal />
+            </NavbarProvider>
+          </SavedProvidersProvider>
         </AuthProvider>
       </body>
     </html>

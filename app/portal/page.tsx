@@ -145,7 +145,7 @@ export default function PortalDashboard() {
         )}
         {isFamily && (
           <>
-            <Link href="/portal/connections" className="block">
+            <Link href="/my-care" className="block">
               <StatCard
                 label="Inquiries sent"
                 value={inquiryCount !== null ? String(inquiryCount) : "—"}
@@ -187,13 +187,15 @@ export default function PortalDashboard() {
           />
           <QuickAction
             title="View connections"
-            description={
-              isProvider
-                ? "See inquiries from families."
-                : "See your sent inquiries."
-            }
+            description="See inquiries from families."
             href="/portal/connections"
-            show={true}
+            show={isProvider}
+          />
+          <QuickAction
+            title="My Care"
+            description="View your connections and saved providers."
+            href="/my-care"
+            show={isFamily}
           />
           <QuickAction
             title="View your public profile"

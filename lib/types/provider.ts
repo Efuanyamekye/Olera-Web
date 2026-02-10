@@ -123,6 +123,8 @@ export interface ProviderCardData {
   acceptedPayments: string[];
   verified: boolean;
   description?: string;
+  lat?: number | null;
+  lon?: number | null;
 }
 
 /**
@@ -150,6 +152,8 @@ export function toCardFormat(provider: Provider): ProviderCardData {
     acceptedPayments: [],
     verified: false,
     description: provider.provider_description?.slice(0, 100) || undefined,
+    lat: provider.lat,
+    lon: provider.lon,
   };
 }
 
@@ -175,6 +179,8 @@ export function mockToCardFormat(p: any): ProviderCardData {
     acceptedPayments: Array.isArray(p.acceptedPayments) ? p.acceptedPayments : [],
     verified: Boolean(p.verified),
     description: p.description as string | undefined,
+    lat: p.lat as number | undefined,
+    lon: p.lon as number | undefined,
   };
 }
 

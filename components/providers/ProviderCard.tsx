@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSavedProviders } from "@/hooks/use-saved-providers";
 
 export interface StaffMember {
   name: string;
@@ -50,6 +51,9 @@ export interface Provider {
     comment: string;
     relationship?: string;
   }[];
+  // Location coordinates (for map view)
+  lat?: number | null;
+  lon?: number | null;
 }
 
 interface ProviderCardProps {
@@ -76,7 +80,8 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showPricingInfo, setShowPricingInfo] = useState(false);
   const [showStaffInfo, setShowStaffInfo] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const { isSaved: checkSaved, toggleSave } = useSavedProviders();
+  const isSaved = checkSaved(provider.id);
   const displayedHighlights = provider.highlights?.slice(0, 2) || provider.careTypes.slice(0, 2);
 
   // Use images array if available, otherwise fall back to single image
@@ -104,6 +109,7 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   return (
     <Link
       href={`/provider/${provider.slug}`}
+      target="_blank"
       className="group flex flex-col h-full bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-200"
     >
       {/* Image Container */}
@@ -221,7 +227,14 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setIsSaved(!isSaved);
+              toggleSave({
+                providerId: provider.id,
+                slug: provider.slug,
+                name: provider.name,
+                location: provider.address,
+                careTypes: [provider.primaryCategory],
+                image: provider.image,
+              });
             }}
             className={`w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white shadow-sm transition-all duration-200 ${isSaved ? 'scale-110' : ''}`}
             aria-label={isSaved ? "Remove from saved" : "Save provider"}

@@ -126,7 +126,7 @@ export default function SectionNav({
                 </div>
               )}
               <button className="px-4 py-2 text-[13px] font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors">
-                Request Info
+                Connect
               </button>
             </div>
           </div>
