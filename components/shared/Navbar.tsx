@@ -63,8 +63,9 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", handler);
   }, [isFindCareOpen]);
 
-  // Close user/account menu on outside click
+  // Close user/account menu on outside click or Escape
   useEffect(() => {
+    if (!isUserMenuOpen) return;
     function handleClick(e: MouseEvent) {
       if (
         userMenuRef.current &&
@@ -73,9 +74,16 @@ export default function Navbar() {
         setIsUserMenuOpen(false);
       }
     }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsUserMenuOpen(false);
+    }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isUserMenuOpen]);
 
   // Close menus on route change
   useEffect(() => {
@@ -180,40 +188,41 @@ export default function Navbar() {
                     </button>
 
                     {isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-base font-medium text-gray-900 truncate">
+                      <div className="absolute right-0 mt-2.5 w-60 bg-white rounded-2xl shadow-xl ring-1 ring-black/[0.06] py-1.5 z-50">
+                        {/* User identity header */}
+                        <div className="px-4 py-2.5 border-b border-gray-100">
+                          <p className="text-[15px] font-semibold text-gray-900 truncate">
                             {displayName}
                           </p>
                           {profileTypeLabel && (
-                            <p className="text-xs text-primary-600 font-medium">
+                            <p className="text-xs text-primary-600 font-medium mt-0.5">
                               {profileTypeLabel}
                             </p>
                           )}
-                          <p className="text-sm text-gray-500 truncate">
+                          <p className="text-sm text-gray-500 truncate mt-0.5">
                             {user?.email}
                           </p>
                         </div>
                         {isFullyLoaded ? (
                           hasProfile ? (
-                            <>
+                            <div className="px-1.5 py-1">
                               <Link
                                 href="/portal"
-                                className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="block px-3.5 py-2.5 text-[15px] text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                                 onClick={() => setIsUserMenuOpen(false)}
                               >
                                 Dashboard
                               </Link>
                               <Link
                                 href="/portal/profile"
-                                className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="block px-3.5 py-2.5 text-[15px] text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                                 onClick={() => setIsUserMenuOpen(false)}
                               >
                                 Edit Profile
                               </Link>
                               <Link
                                 href="/portal/connections"
-                                className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="block px-3.5 py-2.5 text-[15px] text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                                 onClick={() => setIsUserMenuOpen(false)}
                               >
                                 {isProvider ? "Connections" : "My Inquiries"}
@@ -221,21 +230,23 @@ export default function Navbar() {
                               {isProvider && (
                                 <Link
                                   href="/portal/settings"
-                                  className="block px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                                  className="block px-3.5 py-2.5 text-[15px] text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
                                   Settings
                                 </Link>
                               )}
-                            </>
+                            </div>
                           ) : (
-                            <Link
-                              href="/onboarding"
-                              className="block px-4 py-3 text-base text-primary-600 hover:bg-primary-50 transition-colors font-medium"
-                              onClick={() => setIsUserMenuOpen(false)}
-                            >
-                              Complete your profile
-                            </Link>
+                            <div className="px-1.5 py-1">
+                              <Link
+                                href="/onboarding"
+                                className="block px-3.5 py-2.5 text-[15px] text-primary-600 hover:bg-primary-50 rounded-xl transition-colors font-medium"
+                                onClick={() => setIsUserMenuOpen(false)}
+                              >
+                                Complete your profile
+                              </Link>
+                            </div>
                           )
                         ) : (
                           <div className="px-4 py-3 text-sm text-gray-400">
@@ -244,21 +255,25 @@ export default function Navbar() {
                         )}
                         {/* Profile switcher — only when account data loaded */}
                         {isFullyLoaded && (
-                          <div className="border-t border-gray-100 mt-1 pt-1">
+                          <div className="mx-3.5 border-t border-gray-100" />
+                        )}
+                        {isFullyLoaded && (
+                          <div className="px-1.5 py-1">
                             <ProfileSwitcher
                               onSwitch={() => setIsUserMenuOpen(false)}
                               variant="dropdown"
                             />
                           </div>
                         )}
-                        <div className="border-t border-gray-100 mt-1 pt-1">
+                        <div className="mx-3.5 border-t border-gray-100" />
+                        <div className="px-1.5 py-1">
                           <button
                             type="button"
                             onClick={() => {
                               setIsUserMenuOpen(false);
                               signOut(() => router.push("/"));
                             }}
-                            className="w-full text-left px-4 py-3 text-base text-red-600 hover:bg-red-50 transition-colors"
+                            className="w-full text-left px-3.5 py-2.5 text-[15px] text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                           >
                             Sign out
                           </button>
@@ -267,19 +282,20 @@ export default function Navbar() {
                     )}
                   </div>
                 ) : (
-                  /* ── Unauthenticated: pill menu with get-started options ── */
+                  /* ── Unauthenticated: pill menu with auth + intent options ── */
                   <div className="relative" ref={userMenuRef}>
                     <button
                       type="button"
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 border border-gray-200 rounded-full hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[44px]"
+                      className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 border border-gray-200 rounded-full hover:shadow-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 min-h-[44px]"
                       aria-label="Account menu"
                       aria-expanded={isUserMenuOpen}
+                      aria-haspopup="true"
                     >
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                       </svg>
-                      <div className="w-8 h-8 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
@@ -287,50 +303,82 @@ export default function Navbar() {
                     </button>
 
                     {isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                        <p className="px-4 pt-2 pb-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Get started
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            openAuth({ intent: "family" });
-                          }}
-                          className="w-full text-left px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          I&apos;m looking for care
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            openAuth({ intent: "provider", providerType: "organization" });
-                          }}
-                          className="w-full text-left px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          List my organization
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            openAuth({ intent: "provider", providerType: "caregiver" });
-                          }}
-                          className="w-full text-left px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          Join as a caregiver
-                        </button>
-                        <div className="border-t border-gray-100 mt-1 pt-1">
+                      <div
+                        className="absolute right-0 mt-2.5 w-60 bg-white rounded-2xl shadow-xl ring-1 ring-black/[0.06] py-1.5 z-50"
+                        role="menu"
+                        aria-label="Account menu"
+                      >
+                        {/* Auth actions — prominent at top */}
+                        <div className="px-1.5 pb-1">
                           <button
                             type="button"
+                            role="menuitem"
                             onClick={() => {
                               setIsUserMenuOpen(false);
                               openAuth({ defaultMode: "sign-in" });
                             }}
-                            className="w-full text-left px-4 py-3 text-base text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="w-full text-left px-3.5 py-2.5 text-[15px] font-semibold text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
                           >
                             Log in
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              openAuth({});
+                            }}
+                            className="w-full text-left px-3.5 py-2.5 text-[15px] text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+                          >
+                            Create account
+                          </button>
+                        </div>
+
+                        <div className="mx-3.5 border-t border-gray-100" />
+
+                        {/* Intent actions — secondary, with icons */}
+                        <div className="px-1.5 pt-1">
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              openAuth({ intent: "family" });
+                            }}
+                            className="w-full text-left flex items-center gap-3 px-3.5 py-2.5 text-[15px] text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+                          >
+                            <svg className="w-4.5 h-4.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                            Find care
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              openAuth({ intent: "provider", providerType: "organization" });
+                            }}
+                            className="w-full text-left flex items-center gap-3 px-3.5 py-2.5 text-[15px] text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+                          >
+                            <svg className="w-4.5 h-4.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                            </svg>
+                            List your organization
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              openAuth({ intent: "provider", providerType: "caregiver" });
+                            }}
+                            className="w-full text-left flex items-center gap-3 px-3.5 py-2.5 text-[15px] text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+                          >
+                            <svg className="w-4.5 h-4.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                            Join as a caregiver
                           </button>
                         </div>
                       </div>
@@ -491,17 +539,38 @@ export default function Navbar() {
                     </button>
                   </>
                 ) : (
-                  /* ── Mobile unauthenticated: get-started options ── */
+                  /* ── Mobile unauthenticated: auth-first, then intent ── */
                   <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        openAuth({ defaultMode: "sign-in" });
+                      }}
+                      className="text-left py-3 text-gray-900 font-semibold"
+                    >
+                      Log in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        openAuth({});
+                      }}
+                      className="text-left py-3 text-gray-600 font-medium"
+                    >
+                      Create account
+                    </button>
+                    <hr className="border-gray-100 my-1" />
                     <button
                       type="button"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         openAuth({ intent: "family" });
                       }}
-                      className="text-left py-3 text-gray-700 hover:text-primary-600 font-medium"
+                      className="text-left py-3 text-gray-600 hover:text-primary-600 font-medium"
                     >
-                      I&apos;m looking for care
+                      Find care
                     </button>
                     <button
                       type="button"
@@ -509,9 +578,9 @@ export default function Navbar() {
                         setIsMobileMenuOpen(false);
                         openAuth({ intent: "provider", providerType: "organization" });
                       }}
-                      className="text-left py-3 text-gray-700 hover:text-primary-600 font-medium"
+                      className="text-left py-3 text-gray-600 hover:text-primary-600 font-medium"
                     >
-                      List my organization
+                      List your organization
                     </button>
                     <button
                       type="button"
@@ -519,20 +588,9 @@ export default function Navbar() {
                         setIsMobileMenuOpen(false);
                         openAuth({ intent: "provider", providerType: "caregiver" });
                       }}
-                      className="text-left py-3 text-gray-700 hover:text-primary-600 font-medium"
+                      className="text-left py-3 text-gray-600 hover:text-primary-600 font-medium"
                     >
                       Join as a caregiver
-                    </button>
-                    <hr className="border-gray-100" />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        openAuth({ defaultMode: "sign-in" });
-                      }}
-                      className="text-left py-3 text-gray-700 hover:text-primary-600 font-medium"
-                    >
-                      Log in
                     </button>
                   </>
                 )}
