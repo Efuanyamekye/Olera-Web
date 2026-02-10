@@ -199,11 +199,20 @@ export async function POST(request: Request) {
         profileId = newProfile.id;
       }
 
-      // Create membership for providers
-      await db.from("memberships").upsert(
-        { account_id: accountId, plan: "free", status: "free" } as unknown as Membership,
-        { onConflict: "account_id" }
-      );
+      // Create membership for providers (check first — no unique constraint on account_id)
+      const { data: existingMembership } = await db
+        .from("memberships")
+        .select("id")
+        .eq("account_id", accountId)
+        .limit(1);
+
+      if (!existingMembership || existingMembership.length === 0) {
+        await db.from("memberships").insert({
+          account_id: accountId,
+          plan: "free",
+          status: "free",
+        });
+      }
     } else {
       // Create family profile
       const slug = generateSlug(displayName, city || "", state || "");

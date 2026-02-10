@@ -250,7 +250,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             .from("memberships")
             .select("*")
             .eq("account_id", account.id)
-            .maybeSingle<Membership>(),
+            .limit(1),
         ]),
         QUERY_TIMEOUT_MS,
         "profiles+membership query"
@@ -258,7 +258,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       console.timeEnd("[olera] query: profiles+membership");
 
       const profiles = (profilesResult.data as Profile[]) || [];
-      const membership = membershipResult.data ?? null;
+      const membershipRows = (membershipResult.data as Membership[]) || [];
+      const membership = membershipRows[0] ?? null;
 
       let activeProfile: Profile | null = null;
       if (account.active_profile_id) {

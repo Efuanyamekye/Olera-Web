@@ -85,12 +85,21 @@ export async function createProfileAfterAuth(
     .eq("id", accountId);
   if (accountErr) throw accountErr;
 
-  // Create membership for providers
+  // Create membership for providers (check first — no unique constraint on account_id)
   if (data.intent === "provider") {
-    await supabase.from("memberships").upsert(
-      { account_id: accountId, plan: "free", status: "free" },
-      { onConflict: "account_id" }
-    );
+    const { data: existingMembership } = await supabase
+      .from("memberships")
+      .select("id")
+      .eq("account_id", accountId)
+      .limit(1);
+
+    if (!existingMembership || existingMembership.length === 0) {
+      await supabase.from("memberships").insert({
+        account_id: accountId,
+        plan: "free",
+        status: "free",
+      });
+    }
   }
 
   return profileId;
