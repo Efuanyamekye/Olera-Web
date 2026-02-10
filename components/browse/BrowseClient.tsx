@@ -286,7 +286,7 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
   };
 
   // Default location for fallback (simulates geolocation default)
-  const DEFAULT_LOCATION = "New York, NY";
+  const DEFAULT_LOCATION = "Houston, TX";
 
   // Geolocation function
   const detectLocation = () => {
