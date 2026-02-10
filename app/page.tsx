@@ -653,7 +653,7 @@ function BrowseByCareTypeSection() {
         const { data, error } = await supabase
           .from(PROVIDERS_TABLE)
           .select("*")
-          .eq("deleted", false)
+          .not("deleted", "is", true)
           .ilike("provider_category", `%${providerCategory}%`)
           .not("provider_images", "is", null)
           .order("google_rating", { ascending: false, nullsFirst: false })
@@ -902,7 +902,7 @@ export default function HomePage() {
         const { data, error } = await supabase
           .from(PROVIDERS_TABLE)
           .select("*")
-          .eq("deleted", false)
+          .not("deleted", "is", true)
           .not("google_rating", "is", null)
           .gte("google_rating", 4.0)
           .not("provider_images", "is", null)

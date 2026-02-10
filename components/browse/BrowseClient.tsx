@@ -104,8 +104,9 @@ function CarouselSection({
 
   return (
     <div className="mb-10">
-      <div className="mb-3">
+      <div className="flex items-center gap-2 mb-3">
         <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+        <span className="text-sm text-gray-400 font-medium">({providers.length})</span>
       </div>
       <div className="relative group/carousel">
         <div
@@ -197,7 +198,7 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
       let query = supabase
         .from(PROVIDERS_TABLE)
         .select("*")
-        .eq("deleted", false);
+        .not("deleted", "is", true);
 
       // Apply care type filter
       if (careType && careType !== "all") {
@@ -539,10 +540,10 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
                 <div className="absolute left-0 top-[calc(100%+8px)] w-[300px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 z-[100] max-h-[340px] overflow-y-auto">
                   {/* Search Input */}
                   <div className="px-3 pb-2">
-                    <div className={`flex items-center px-3 py-2.5 bg-gray-50 rounded-xl border transition-colors ${
+                    <div className={`flex items-center px-4 py-3 bg-gray-50 rounded-xl border transition-colors ${
                       locationInput.trim() ? "border-primary-400 ring-2 ring-primary-100" : "border-gray-200"
                     }`}>
-                      <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -553,7 +554,7 @@ export default function BrowseClient({ careType, searchQuery }: BrowseClientProp
                         onChange={(e) => setLocationInput(e.target.value)}
                         onFocus={preloadCities}
                         placeholder="City or ZIP code"
-                        className="w-full ml-2.5 bg-transparent border-none text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-sm"
+                        className="w-full ml-3 bg-transparent border-none text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-base"
                       />
                     </div>
                   </div>

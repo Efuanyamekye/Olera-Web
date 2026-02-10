@@ -125,7 +125,7 @@ export default async function ProviderPage({
       .from("olera-providers")
       .select("*")
       .eq("provider_id", slug)
-      .eq("deleted", false)
+      .not("deleted", "is", true)
       .single<IOSProvider>();
 
     if (iosProvider) {

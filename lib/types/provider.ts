@@ -123,6 +123,8 @@ export interface ProviderCardData {
   acceptedPayments: string[];
   verified: boolean;
   description?: string;
+  lat?: number | null;
+  lon?: number | null;
 }
 
 /**
@@ -150,6 +152,8 @@ export function toCardFormat(provider: Provider): ProviderCardData {
     acceptedPayments: [],
     verified: false,
     description: provider.provider_description?.slice(0, 100) || undefined,
+    lat: provider.lat,
+    lon: provider.lon,
   };
 }
 

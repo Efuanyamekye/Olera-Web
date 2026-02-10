@@ -49,7 +49,7 @@ export default function BrowsePageClient({
         let query = supabase
           .from(PROVIDERS_TABLE)
           .select("*")
-          .eq("deleted", false);
+          .not("deleted", "is", true);
 
         // Apply care type filter
         if (careTypeFilter) {

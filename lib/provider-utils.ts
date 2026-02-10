@@ -206,7 +206,7 @@ export async function getSimilarProviders(
     const { data, error } = await supabase
       .from(PROVIDERS_TABLE)
       .select("*")
-      .eq("deleted", false)
+      .not("deleted", "is", true)
       .ilike("provider_category", `%${supabaseCategory}%`)
       .neq("provider_id", excludeSlug)
       .not("provider_images", "is", null)
