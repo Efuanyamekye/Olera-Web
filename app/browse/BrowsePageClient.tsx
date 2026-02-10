@@ -222,6 +222,8 @@ function ProviderBrowseCard({ provider }: { provider: ProviderCardData }) {
   return (
     <Link
       href={`/provider/${provider.slug || provider.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
       className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-primary-200 transition-shadow duration-200 block cursor-pointer"
     >
       {/* Image */}

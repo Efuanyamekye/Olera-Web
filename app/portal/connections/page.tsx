@@ -417,6 +417,8 @@ function ConnectionCard({
               {otherProfile.slug && (
                 <Link
                   href={`/provider/${otherProfile.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 bg-white text-primary-700 text-sm font-medium px-3 py-2 rounded-lg border border-primary-200 hover:bg-primary-100 transition-colors"
                 >
                   Profile

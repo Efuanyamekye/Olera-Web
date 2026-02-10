@@ -210,6 +210,7 @@ export default function PortalDashboard() {
             description="See how your profile appears to families."
             href={`/provider/${activeProfile.slug}`}
             show={isProvider}
+            target="_blank"
           />
 
           {/* Role-specific discovery actions */}
@@ -260,17 +261,20 @@ function QuickAction({
   description,
   href,
   show,
+  target,
 }: {
   title: string;
   description: string;
   href: string;
   show: boolean;
+  target?: string;
 }) {
   if (!show) return null;
 
   return (
     <Link
       href={href}
+      {...(target ? { target, rel: "noopener noreferrer" } : {})}
       className="block p-6 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all group"
     >
       <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-700 mb-1">

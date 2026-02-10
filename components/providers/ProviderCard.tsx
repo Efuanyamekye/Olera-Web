@@ -108,6 +108,8 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   return (
     <Link
       href={`/provider/${provider.slug}`}
+      target="_blank"
+      rel="noopener noreferrer"
       className="group flex flex-col h-full bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-200"
     >
       {/* Image Container */}
